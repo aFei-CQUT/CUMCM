@@ -1,0 +1,657 @@
+% =======================================
+% 参考文献
+% =======================================
+
+%\bibliography{src/E-Reference}
+% 引用所有 E-Reference.bib 里面的全部参考文献，不论在论文中是否被引用
+%\nocite{*}
+
+% =======================================
+% 附件
+% =======================================
+
+\appendix
+
+% =======================================
+% 使用软件
+% =======================================
+
+\section{主要使用的软件}
+
+\begin{enumerate}
+    \item 文字编辑：\LaTeX + Git
+    \item 程序模拟：Anaconda + Python
+\end{enumerate}
+
+% =======================================
+% 程序代码
+% =======================================
+
+\section{程序代码}
+
+% =======================================
+% 数据预处理代码
+% =======================================
+
+\begin{lstlisting}[caption={数据预处理代码}]
+	import pandas as pd
+	import os
+	import chardet
+	from sklearn.impute import KNNImputer
+	from sklearn.preprocessing import MinMaxScaler
+	
+	def process_csv_files(directory):
+	# 创建一个列表来存储所有文件的结果
+	all_files = []
+	
+	# 遍历目录中的所有CSV文件
+	for filename in os.listdir(directory):
+	if filename.endswith('.csv'):
+	file_path = os.path.join(directory, filename)        
+	processed_results_1 = pd.read_csv(file_path, header=None, skiprows=4, encoding='utf-8',
+	quotechar='"', thousands=',', na_values=[''])
+	
+	# 获取索引为0和41的行
+	row_0 = processed_results_1.iloc[0].tolist()
+	row_41 = processed_results_1.iloc[41].tolist() if len(processed_results_1) > 41 else None
+	
+	# 将结果添加到列表中
+	all_files.append(row_0)
+	if row_41:
+	all_files.append(row_41)
+	
+	# 将结果写入处理后的CSV文件
+	pd.DataFrame(all_files).to_csv(r'..\res\data\processed_results_1.csv', index=False, header=False)
+	
+	# 检测文件编码
+	with open(r'..\res\data\processed_results_1.csv', 'rb') as f:
+	result = chardet.detect(f.read())
+	
+	# 使用Pandas读取处理后的CSV文件
+	processed_results_1 = pd.read_csv(r'..\res\data\processed_results_1.csv', encoding=result['encoding'])
+	
+	# 提取数据行
+	processed_results_2 = processed_results_1.iloc[0::2]
+	
+	# 将数据行写入新的CSV文件
+	processed_results_2.to_csv(r'..\res\data\processed_results_2.csv', index=False, header=False)
+	
+	# 读取processed_results_2.csv文件
+	data_df = pd.read_csv(r'..\res\data\processed_results_2.csv', header=None)
+	
+	# 提取数据对应的变量名
+	name = data_df.iloc[:, 2]
+	
+	# 提取数据
+	data = data_df.iloc[:, 38:-1].values
+	# 将提取的数据保存到CSV文件
+	pd.DataFrame(data).to_csv(r'..\res\data\data.csv', index=False, header=False)
+	
+	# 使用KNN填充缺失值
+	imputer = KNNImputer(n_neighbors=5)  # 可以调整n_neighbors的值
+	data_imputed = imputer.fit_transform(data)
+	
+	# 将使用KNN填充缺失值后的数据保存到CSV文件
+	pd.DataFrame(data_imputed).to_csv(r'..\res\data\data_imputed.csv', index=False, header=False)
+	
+	# 创建MinMaxScaler实例
+	scaler = MinMaxScaler()
+	
+	# 对每一行进行归一化
+	data_normalized = scaler.fit_transform(data_imputed.T).T  # Transpose to normalize rows, then transpose back
+	
+	# 将归一化后的数据保存到CSV文件
+	pd.DataFrame(data_normalized).to_csv(r'..\res\data\data_normalized.csv', index=False, header=False)
+	
+	return name, data, data_imputed, data_normalized
+	
+	# 设置目录路径
+	directory = r'..\res\csv'
+	
+	# 处理CSV文件并获取数据
+	name, data, data_imputed, data_normalized = process_csv_files(directory)
+
+\end{lstlisting}
+
+% =======================================
+% 问题一处理代码
+% =======================================
+
+\begin{lstlisting}[caption={问题一处理代码}]
+	
+	import pandas as pd
+	import matplotlib.pyplot as plt
+	
+	# 设置绘图风格
+	plt.style.use('ggplot')
+	plt.rcParams['font.family'] = 'simhei'
+	plt.rcParams['axes.unicode_minus'] = False
+	
+	# 加载 CSV 文件
+	file_path = r'../res/data/data_imputed.csv'
+	data = pd.read_csv(file_path, header=None)
+	
+	# 指定需要绘制的指标的索引和对应的标签
+	indices = [6, 2, 4, 8]
+	labels = ["货币供给量", "收入", "利率", "通货膨胀率"]
+	
+	# 获取指定索引的数据
+	data_to_plot = data.iloc[indices]
+	
+	# 转置数据以便于绘图和统计计算
+	data_transposed = data_to_plot.T
+	
+	# 确保年份的生成与数据的行数一致
+	years = range(2024 - len(data_transposed.index), 2024)
+	
+	# 1. 绘制条形图
+	axes_bar = data_transposed.plot(kind='bar', subplots=True, layout=(2, 2), figsize=(12*1.2, 9*1.2), legend=False)
+	
+	# 设置 x 轴刻度标签
+	for ax in axes_bar.flatten():
+	ax.set_xticks(range(len(data_transposed.index)))    # 设置刻度位置
+	ax.set_xticklabels(years)                           # 设置刻度标签为年份
+	ax.tick_params(axis='x', rotation=45)               # 旋转刻度标签
+	ax.xaxis.set_tick_params(labelbottom=True)          # 确保显示 x 轴标签
+	
+	# 为每个子图设置标题
+	for ax, label in zip(axes_bar.flatten(), labels):
+	ax.set_title(label)
+	
+	plt.tight_layout()
+	plt.subplots_adjust(hspace=0.15)                        # 调整上下间距
+	plt.savefig('../res/png/1_bar_plot.png', dpi=300)
+	plt.show()
+	
+	# 2. 箱线图
+	fig, axes = plt.subplots(2, 2, figsize=(12*1.2, 9*1.2))
+	
+	for i, (ax, label) in enumerate(zip(axes.flatten(), labels)):
+	ax.boxplot(data.iloc[indices[i]].values)
+	ax.set_title(label)
+	ax.set_xticks([1])
+	ax.set_xticklabels([label])                         # 设置箱线图的 x 轴标签为指标名称
+	
+	plt.tight_layout()
+	plt.subplots_adjust(hspace=0.15)                        # 调整上下间距
+	plt.savefig('../res/png/2_box_plot.png', dpi=300)
+	plt.show()
+	
+	# 3. 面积图
+	axes_area = data_transposed.plot(kind='area', subplots=True, layout=(2, 2), stacked=False, figsize=(12*1.2, 9*1.2), legend=False)
+	
+	for ax in axes_area.flatten():
+	ax.set_xticks(range(len(data_transposed.index)))    # 设置刻度位置
+	ax.set_xticklabels(years)                           # 设置刻度标签为年份
+	ax.tick_params(axis='x', rotation=45)               # 旋转刻度标签
+	ax.axhline(0, color='black', linewidth=0.8)         # 添加水平线
+	ax.xaxis.set_tick_params(labelbottom=True)          # 确保显示 x 轴标签
+	
+	# 为每个子图设置标题
+	for ax, label in zip(axes_area.flatten(), labels):
+	ax.set_title(label)
+	
+	plt.tight_layout()
+	plt.subplots_adjust(hspace=0.15)                        # 调整上下间距
+	plt.savefig('../res/png/3_area_plot.png', dpi=300)
+	plt.show()
+	
+	# 统计量计算
+	statistics = data_transposed.describe()                 # 获取描述性统计
+	
+	# 计算偏度和峰度
+	skewness = data_transposed.skew()                      # 计算偏度
+	kurtosis = data_transposed.kurtosis()                  # 计算峰度
+	
+	# 将偏度和峰度添加到统计量中
+	statistics.loc['skewness'] = skewness
+	statistics.loc['kurtosis'] = kurtosis
+	
+	# 打印统计量
+	print(statistics)
+	
+	# 相关性分析
+	correlation_pearson = data_transposed.corr(method='pearson')   # 皮尔逊相关系数
+	correlation_spearman = data_transposed.corr(method='spearman') # 斯皮尔曼等级相关系数
+	
+	# 打印相关性矩阵
+	print("Pearson Correlation Coefficients:")
+	print(correlation_pearson)
+	print("\nSpearman Correlation Coefficients:")
+	print(correlation_spearman)
+	
+\end{lstlisting}
+
+% =======================================
+% 问题二处理代码
+% =======================================
+
+\begin{lstlisting}[caption={问题二处理代码}]
+	
+	import pandas as pd
+	import matplotlib.pyplot as plt
+	import statsmodels.api as sm
+	import numpy as np
+	from sklearn.impute import KNNImputer
+	from sklearn.preprocessing import PowerTransformer
+	from sklearn.linear_model import LinearRegression
+	from sklearn.tree import DecisionTreeRegressor
+	from sklearn.ensemble import RandomForestRegressor, GradientBoostingRegressor, VotingRegressor
+	from sklearn.svm import SVR
+	
+	# 设置绘图风格
+	plt.style.use('ggplot')
+	plt.rcParams['font.family'] = 'simhei'
+	plt.rcParams['axes.unicode_minus'] = False
+	
+	# 加载归一化的 CSV 文件
+	file_path = r'../res/data/data_normalized.csv'
+	data_normalized = pd.read_csv(file_path, header=None)
+	
+	# 指定需要绘制的指标的索引和对应的标签
+	indices = [6, 3, 4, 8]  # M2、GNI、IR、RIR
+	labels = ["M2", "GNI", "IR", "RIR"]
+	
+	# 获取指定索引的数据
+	data = data_normalized.iloc[indices].T  # 转置以便于后续处理
+	data.columns = labels
+	
+	# 计算M2的变化率和GNI的变化量，并处理无穷大和NaN值
+	data['M2_change_rate'] = data['M2'].pct_change().replace([np.inf, -np.inf], np.nan)
+	data['GNI_change'] = data['GNI'].diff()
+	
+	# 使用 KNNImputer 填补缺失值
+	imputer = KNNImputer(n_neighbors=5)
+	data_imputed = pd.DataFrame(imputer.fit_transform(data), columns=data.columns)
+	
+	# 应用 Yeo-Johnson 变换
+	pt = PowerTransformer(method='yeo-johnson', standardize=True)
+	data_transformed = pd.DataFrame(pt.fit_transform(data_imputed), columns=data_imputed.columns)
+	
+	# 单变量回归模型
+	def single_variable_regression(X, y, label):
+	X = sm.add_constant(X)
+	model = sm.OLS(y, X).fit()
+	print(f"\n{label} 回归模型摘要:")
+	print(model.summary())
+	return model
+	
+	# 多元回归模型
+	def multivariate_regression(X, y):
+	X = sm.add_constant(X)
+	model = sm.OLS(y, X).fit()
+	print("\n多元回归模型摘要:")
+	print(model.summary())
+	return model
+	
+	# 逆变换函数
+	def inverse_transform(y_pred_transformed, column_name):
+	y_pred_original = pt.inverse_transform(data_transformed)[:, data_transformed.columns.get_loc('IR')]
+	y_pred_original = y_pred_original * y_pred_transformed.std() + y_pred_transformed.mean()
+	print(f"\n反变换后的预测 {column_name}:")
+	print(y_pred_original)
+	return y_pred_original
+	
+	# 单变量回归
+	model_supply = single_variable_regression(data_transformed['M2_change_rate'], data_transformed['IR'], "货币供给")
+	model_demand = single_variable_regression(data_transformed['GNI_change'], data_transformed['IR'], "货币需求")
+	model_rir = single_variable_regression(data_transformed['RIR'], data_transformed['IR'], "实际利率")
+	
+	# 多元回归
+	X_multivariate = data_transformed[['M2_change_rate', 'GNI_change', 'RIR']]
+	y_multivariate = data_transformed['IR']
+	model_multivariate = multivariate_regression(X_multivariate, y_multivariate)
+	
+	# 预测
+	y_pred_supply = model_supply.predict(sm.add_constant(data_transformed['M2_change_rate']))
+	y_pred_demand = model_demand.predict(sm.add_constant(data_transformed['GNI_change']))
+	y_pred_rir = model_rir.predict(sm.add_constant(data_transformed['RIR']))
+	y_pred_multivariate = model_multivariate.predict(sm.add_constant(X_multivariate))
+	
+	# 反变换预测结果
+	y_pred_supply_original = inverse_transform(y_pred_supply, "IR (M2)")
+	y_pred_demand_original = inverse_transform(y_pred_demand, "IR (GNI)")
+	y_pred_rir_original = inverse_transform(y_pred_rir, "IR (RIR)")
+	y_pred_multivariate_original = inverse_transform(y_pred_multivariate, "IR (Multivariate)")
+	
+	# 集成学习模型函数
+	def fit_voting_model(X, y, y_label):
+	# 定义多个基学习器
+	model1 = LinearRegression()
+	model2 = DecisionTreeRegressor(random_state=42)
+	model3 = RandomForestRegressor(n_estimators=100, random_state=42)
+	model4 = GradientBoostingRegressor(n_estimators=100, random_state=42)
+	model5 = SVR()
+	
+	# 创建投票回归模型
+	voting_model = VotingRegressor(estimators=[
+	('lr', model1),
+	('dt', model2),
+	('rf', model3),
+	('gb', model4),
+	('svr', model5)
+	])
+	
+	# 训练模型
+	voting_model.fit(X, y)
+	y_pred = voting_model.predict(X)
+	
+	print(f"\n{y_label} 投票模型 R-squared: {voting_model.score(X, y):.4f}")
+	return y_pred
+	
+	# 使用投票模型进行预测
+	y_pred_voting = fit_voting_model(X_multivariate, y_multivariate, "多元回归")
+	
+	# 反变换投票模型的预测结果
+	y_pred_voting_original = inverse_transform(y_pred_voting, "IR (Voting)")
+	
+	# 绘制原始数据和预测结果
+	fig, axs = plt.subplots(2, 2, figsize=(16, 12))
+	fig.suptitle('利率预测对比', fontsize=16)
+	
+	axs[0, 0].plot(data['IR'], label='实际IR')
+	axs[0, 0].plot(y_pred_supply_original, label='货币供给预测IR')
+	axs[0, 0].set_title('货币供给模型')
+	axs[0, 0].set_xlabel('时间')
+	axs[0, 0].set_ylabel('利率')
+	axs[0, 0].legend()
+	
+	axs[0, 1].plot(data['IR'], label='实际IR')
+	axs[0, 1].plot(y_pred_demand_original, label='货币需求预测IR')
+	axs[0, 1].set_title('货币需求模型')
+	axs[0, 1].set_xlabel('时间')
+	axs[0, 1].set_ylabel('利率')
+	axs[0, 1].legend()
+	
+	axs[1, 0].plot(data['IR'], label='实际IR')
+	axs[1, 0].plot(y_pred_rir_original, label='实际利率预测IR')
+	axs[1, 0].set_title('实际利率模型')
+	axs[1, 0].set_xlabel('时间')
+	axs[1, 0].set_ylabel('利率')
+	axs[1, 0].legend()
+	
+	axs[1, 1].plot(data['IR'], label='实际IR')
+	axs[1, 1].plot(y_pred_multivariate_original, label='多元回归预测IR')
+	axs[1, 1].set_title('多元回归模型')
+	axs[1, 1].set_xlabel('时间')
+	axs[1, 1].set_ylabel('利率')
+	axs[1, 1].legend()
+	
+	plt.tight_layout()
+	plt.show()
+	
+	# 计算并打印 R-squared 值
+	print("\nR-squared 值:")
+	print(f"货币供给模型: {model_supply.rsquared:.4f}")
+	print(f"货币需求模型: {model_demand.rsquared:.4f}")
+	print(f"实际利率模型: {model_rir.rsquared:.4f}")
+	print(f"多元回归模型: {model_multivariate.rsquared:.4f}")
+	
+	# data_normalized 或 data_imputed 中每一行数据含义(没有标签)
+	# 0 '消费者价格指数（2010 年 = 100）'
+	# 1 'GDP 增长率（年百分比）'
+	# 2 'GDP（不变价本币单位）'
+	# 3 'GNI（不变价本币单位）'
+	# 4 '按消费者价格指数衡量的通货膨胀（年通胀率）'
+	# 5 '广义货币增长（年度百分比）'
+	# 6 '广义货币（现价本币单位）'
+	# 7 '存款利率 (百分比)'
+	# 8 '实际利率 （%）'
+	# 9 '总失业人数（占劳动力总数的比例）（模拟劳工组织估计）'
+	# 10 '贷款利率 (百分比)'
+	
+\end{lstlisting}
+
+% =======================================
+% 问题三处理代码
+% =======================================
+
+\begin{lstlisting}[caption={问题三处理代码}]
+	
+	import pandas as pd
+	import matplotlib.pyplot as plt
+	from statsmodels.tsa.stattools import adfuller, coint
+	from statsmodels.tsa.api import VAR
+	
+	# 设置绘图风格
+	plt.style.use('ggplot')
+	plt.rcParams['font.family'] = 'simhei'
+	plt.rcParams['axes.unicode_minus'] = False
+	
+	# 加载归一化的 CSV 文件
+	file_path = r'../res/data/data_normalized.csv'
+	data_normalized = pd.read_csv(file_path, header=None)
+	
+	# 指定需要分析的指标的索引
+	indices = [6, 3, 4, 8]  # 广义货币（现价本币单位）、GNI（不变价本币单位）、按消费者价格指数衡量的通货膨胀（年通胀率）、实际利率 （%）
+	labels = ["货币供给量", "GNI", "通货膨胀率", "利率"]
+	
+	# 获取指定索引的数据
+	data = data_normalized.iloc[indices].T  # 转置以便于后续处理
+	data.columns = labels  # 重命名列名
+	
+	# 打印数据以检查
+	print("数据的形状:", data.shape)
+	print(data.head())  # 打印前几行数据
+	
+	# 检查数据的平稳性
+	def adf_test(series):
+	result = adfuller(series)
+	print(f'ADF Statistic: {result[0]}')
+	print(f'p-value: {result[1]}')
+	print('Critical Values:')
+	for key, value in result[4].items():
+	print(f'   {key}: {value}')
+	print('---')
+	
+	# 对每个变量进行ADF检验
+	for label in labels:
+	print(f'检验 {label} 的平稳性:')
+	adf_test(data[label])
+	
+	# 协整检验
+	def cointegration_test(series1, series2):
+	score, p_value, _ = coint(series1, series2)
+	print('协整检验结果:')
+	print(f'Cointegration Score: {score}, p-value: {p_value}')
+	
+	# 检查所有变量之间的协整关系
+	for i in range(len(labels)):
+	for j in range(i + 1, len(labels)):
+	print(f'正在检验协整关系: {labels[i]} 和 {labels[j]}')
+	cointegration_test(data[labels[i]], data[labels[j]])
+	
+	# 构建VAR模型
+	model = VAR(data)
+	results = model.fit(maxlags=5)
+	print(results.summary())
+	
+	# Granger因果关系检验
+	def granger_causality_test(data):
+	for i in range(len(labels)):
+	for j in range(len(labels)):
+	if i != j:
+	test_result = results.test_causality(labels[i], labels[j], kind='f')
+	print(f'Granger因果关系检验: {labels[i]} -> {labels[j]}')
+	print(test_result.summary())
+	print('---')
+	
+	# 进行Granger因果关系检验
+	granger_causality_test(data)
+	
+\end{lstlisting}
+
+% =======================================
+% 问题四处理代码
+% =======================================
+
+\begin{lstlisting}[caption={问题四处理代码}]
+	
+	import pandas as pd
+	import numpy as np
+	import matplotlib.pyplot as plt
+	from statsmodels.tsa.stattools import adfuller
+	from statsmodels.graphics.tsaplots import plot_acf, plot_pacf
+	from sklearn.impute import KNNImputer
+	from statsmodels.tsa.api import VAR
+	
+	# 设置绘图风格
+	plt.style.use('ggplot')
+	plt.rcParams['font.family'] = 'simhei'
+	plt.rcParams['axes.unicode_minus'] = False
+	
+	# 加载归一化的 CSV 文件
+	file_path = r'../res/data/data_normalized.csv'
+	data_normalized = pd.read_csv(file_path, header=None)
+	
+	# 指定需要分析的指标的索引
+	indices = [6, 3, 4, 8]  # 广义货币、GNI、通货膨胀率、实际利率
+	labels = ["货币供给量", "GNI", "通货膨胀率", "利率"]
+	
+	# 获取指定索引的数据并转置
+	data = data_normalized.iloc[indices].T  
+	data.columns = labels  # 重命名列名
+	
+	# 打印数据以检查
+	print("数据的形状:", data.shape)
+	print(data.head())  # 打印前几行数据
+	
+	# 检查数据中的缺失值和无穷值
+	def check_for_infs_and_nans(data):
+	if data.isna().any().any():
+	print("数据中存在缺失值.")
+	if np.isinf(data.values).any():
+	print("数据中存在无穷值.")
+	
+	# 处理无穷值和NaN值
+	def handle_inf_and_nan(data):
+	data = data.replace([np.inf, -np.inf], np.nan)
+	data = data.ffill().bfill()  # 使用 ffill() 和 bfill() 替代 fillna(method='ffill') 和 fillna(method='bfill')
+	return data
+	
+	# 对数变换
+	def log_transform(series):
+	return np.log(series + 1)  # 加1以避免对数为负无穷
+	
+	# 应用对数变换
+	for label in labels:
+	data[label] = log_transform(data[label])
+	
+	# 检查数据的平稳性
+	def adf_test(series):
+	result = adfuller(series.dropna())
+	print(f'ADF Statistic: {result[0]}')
+	print(f'p-value: {result[1]}')
+	print('Critical Values:')
+	for key, value in result[4].items():
+	print(f'   {key}: {value}')
+	print('---')
+	
+	# 对每个变量进行ADF检验
+	for label in labels:
+	print(f'检验 {label} 的平稳性:')
+	adf_test(data[label])
+	
+	# 对不平稳数据进行差分处理
+	def difference(series):
+	return series.diff().dropna()
+	
+	# 检查是否需要多阶差分
+	def check_and_difference(data):
+	differenced_data = pd.DataFrame(index=data.index)
+	for label in labels:
+	print(f'检验 {label} 的平稳性（差分前）:')
+	adf_test(data[label])
+	
+	diff_count = 0
+	while adfuller(data[label].dropna())[1] > 0.05:  # 如果p-value > 0.05，则数据不平稳
+	print(f'{label} 不平稳，进行差分处理')
+	data[label] = difference(data[label])
+	diff_count += 1
+	if diff_count > 5:  # 限制最多进行五阶差分
+	print(f'{label} 需要多阶差分处理，超出最大差分次数')
+	break
+	
+	differenced_data[label] = data[label]
+	print(f'{label} 平稳性差分处理后:')
+	adf_test(differenced_data[label])
+	
+	return differenced_data
+	
+	# 处理无穷值和NaN值
+	data = handle_inf_and_nan(data)
+	
+	differenced_data = check_and_difference(data)
+	
+	# 处理缺失值（前向填补）
+	differenced_data = differenced_data.ffill()
+	
+	# 再次检查缺失值
+	check_for_infs_and_nans(differenced_data)
+	
+	# 如果仍有缺失值，使用KNN插补
+	if differenced_data.isna().any().any():
+	print("数据中仍有缺失值，使用KNN插补")
+	imputer = KNNImputer(n_neighbors=5)
+	differenced_data_np = differenced_data.to_numpy()  # 转换为numpy数组以便KNN插补
+	differenced_data_np = imputer.fit_transform(differenced_data_np)
+	differenced_data = pd.DataFrame(differenced_data_np, columns=differenced_data.columns, index=differenced_data.index)
+	
+	# 再次检查数据
+	check_for_infs_and_nans(differenced_data)
+	
+	# 确认处理后的数据
+	print("处理后的数据形状:", differenced_data.shape)
+	print(differenced_data.head())
+	
+	# 绘制 ACF 和 PACF 图
+	def plot_acf_pacf(data, labels):
+	fig, axes = plt.subplots(len(labels), 2, figsize=(14, 3 * len(labels)))
+	max_lag = min(len(data) // 2 - 1, 20)  # 选择滞后期数
+	for i, label in enumerate(labels):
+	# ACF 图
+	plot_acf(data[label].dropna(), ax=axes[i, 0], lags=max_lag, title=f'ACF of {label}')
+	# PACF 图
+	plot_pacf(data[label].dropna(), ax=axes[i, 1], lags=max_lag, title=f'PACF of {label}')
+	plt.tight_layout()
+	plt.show()
+	
+	plot_acf_pacf(differenced_data, labels)
+	
+	# 使用 VAR 模型进行多维时间序列建模
+	def fit_var_model(data):
+	model = VAR(data)
+	# 计算合适的maxlags
+	n_obs = len(data)
+	n_vars = len(data.columns)
+	max_lags = min(int(np.floor((n_obs - 2) / (2 * n_vars))), 15)
+	print(f"使用的最大滞后阶数: {max_lags}")
+	model_fitted = model.fit(maxlags=max_lags, ic='aic')
+	return model_fitted
+	
+	# 训练VAR模型
+	var_model = fit_var_model(differenced_data)
+	
+	# 预测未来走势
+	def forecast_var_model(model, data, steps=5):
+	print("预测数据的形状:", data.shape)
+	print("检查数据中的缺失值和无穷值:")
+	check_for_infs_and_nans(data)
+	
+	forecast = model.forecast(data.values[-model.k_ar:], steps=steps)
+	
+	# 生成预测的日期索引
+	last_date = data.index[-1]
+	if isinstance(last_date, pd.Timestamp):
+	forecast_index = pd.date_range(start=last_date + pd.Timedelta(days=1), periods=steps)
+	else:
+	forecast_index = range(len(data), len(data) + steps)
+	
+	forecast_df = pd.DataFrame(forecast, index=forecast_index, columns=data.columns)
+	return forecast_df
+	
+	forecast_df = forecast_var_model(var_model, differenced_data, steps=5)
+	print('VAR模型未来 5 步预测:')
+	print(forecast_df)
+	
+\end{lstlisting}

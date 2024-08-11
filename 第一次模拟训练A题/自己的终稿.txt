@@ -1,0 +1,948 @@
+# 第一次模拟训练A题
+
+<p style="text-align: center; font-weight: bold;">摘要</p>
+
+<p style="text-align: left; text-indent: 2em;">
+    本研究针对一个拥有200英亩农场的农场主，在现有条件下制定了一个5年的生产计划。农场主要产出为奶牛和牛奶。研究考虑了奶牛的生命周期、土地利用效率、饲料供给、经济效益和农场的可持续性。模型包括了奶牛的出生率、死亡率、产奶量和土地的粮食及甜菜产量。同时，考虑了农场雇佣的工人成本、饲料成本以及可能的牛舍扩建投资。模型的约束条件包括农场牛舍容量限制、奶牛数量范围以及不允许年度现金流量为负。通过优化模型，得出了一项旨在提高农场盈利能力、合理配置资源和保持奶牛数量可持续的生产计划。
+</p>
+<p style="text-align: left; text-indent: 2em; font-weight: bold;">	
+关键词：可持续性 生产计划 资源优化 经济效益 成本效益分析
+</p>
+
+
+## 问题重述
+
+###  问题背景
+
+​	在一个拥有200英亩土地的农场上，农场主的主要收入来源是奶牛饲养和牛奶生 产。农场目前拥有120头奶牛，其中包括100头成年奶牛和20头小母牛。每头成年奶牛 每年可以产出1.1头小牛，其中一半为公牛，出生后不久便以30美元的价格出售，另 一半为小母牛，可以选择以40美元的价格出售，或饲养到两岁成为成年奶牛。成年奶 牛的产奶期为2岁到11岁，每年可以产生370美元的牛奶收入。12岁及以上的奶牛产奶 量减少，因此通常会被以120美元的价格出售。奶牛和小母牛分别需要1英亩和2/3英 亩的土地来饲养。 农场有80英亩的土地适合种植粮食，产量因土地的不同而有所差异；此外，甜菜 可以在其他土地上种植，产量为1.5吨/英亩。甜菜和粮食可以用于奶牛饲养或出售。 农场的牛舍当前最大可容纳130头牛，但可以通过每200美元的投资增加1头牛的饲养 容量。农场主还可以通过贷款来扩充牛舍，贷款年利率为15 此外，农场每年支出4000美元的工资，获得5500小时的劳动力，可以通过支付1.20美 元/小时的价格获得额外劳动力。农场在劳动力和土地分配、奶牛饲养和农产品种植 之间需要做出合理的规划，以实现五年内的利润最大化。 
+
+### 问题提出 
+
+​	在一个拥有200英亩土地的农场上，农场主以奶牛饲养和牛奶生产为主要经济来源。当前农场拥有120头奶牛，其中包括100头成年奶牛和20头小母牛（小于2岁 的母牛）。为了优化农场的生产和运营，需要制定一个为期5年的详细生产计划，使得农场在满足资源和经济约束的前提下，能够实现利润的最大化。
+
+## 问题分析
+
+### **问题目标** 
+
+​	这个问题涉及多个方面的决策和优化，包括奶牛数量管理、土地资源分配、牛 舍扩展投资、劳动力配置等。需要制定一个以五年为期的生产计划,以优化农场的产 出,并最大化利益。
+
+### **决策变量**
+
+​	小母牛出售比例
+​	贷款资金
+​	种植牧草的土地
+​	种植粮食的土地(分为4块)
+​	种植甜菜的土地
+
+### **约束条件**
+
+​	土地利用:土地的分配必须满足奶牛和小母牛的需求.
+​	牛舍容量:当前和潜在的牛舍容量限制必须被考虑。
+​	资金预算:确保年度现金流量不为负,并考虑到贷款的偿还。
+​	劳动力:考虑贷款成本和年度还款,确保财务健康。
+​	奶牛数量:五年后奶牛数量必须符合规定，且非负，整数。
+
+### **模型假设** 
+
+​	假设奶牛每年增长和繁殖的速率是固定的，不受其他因素影响。 
+​	假设每头奶牛每天对饲料的消耗量是恒定的. 
+​	假设每种作物在单位土地上的产出是固定的，不受气候变化和土壤退化影响。 
+​	假设每个劳动力单元（例如，每个工人每小时）可以完成的工作量是固定的 
+​	假设贷款的利率是固定的，还款计划是预先设定的。 
+​	假设小母牛和公牛的出售价格和淘汰奶牛的成本是固定的。 
+​	假设在计划期间，没有新的政策和法规会影响农场的运营。 
+​	假设疾病爆发、自然灾害等风险的概率是已知的，且可以通过保险或其他手段来管理。
+
+## 符号变量
+
+| 符号变量                 | 含义                                         |
+| :------------------------- | :------------------------------------------- |
+| $ a_{i} $               | 第 $i$ 个年龄段的生育率          |
+| $ b_{i} $               | 第 $i$ 个年龄段的存活率            |
+| $ \mathbf{x^{(k)}} $               | 第 $ t_k $时刻种群数量分布向量            |
+| $ \mathbf{x^{(0)}} $      | 初始种群数量分布向量                         |
+| $ x_{i}^{(k)} $         | 第 $ t_k $时刻第 $ i $个年龄组的数量 |
+| $ \mathbf{L^{''}} $       | 莱斯利雌雄总矩阵                     |
+| $ \mathbf{L^{'}} $       | 莱斯利雌性或雄性矩阵                     |
+| $ \mathbf{L_{r}} $            | 考虑出售$r$比例小母牛后，莱斯利雌性矩阵 |
+| $ \mathbf{y}_{1} $        | 选择矩阵，用于提取第一个元素                 |
+| $ \mathbf{y}_{12} $       | 选择矩阵，用于提取最后一个元素               |
+| $ \mathbf{y}_{3,12} $       | 选择矩阵，用于提取第三个至最后一个元素               |
+| $ r $                     | 小母牛出售的比例                           |
+| $ w^{(k)}_{小公牛} $     | 第 $ t_k $时刻出售小公牛所得金额          |
+| $ w^{(k)}_{小母牛} $     | 第 $ t_k $时刻出售小母牛所得金额          |
+| $ w^{(k)}_{老母牛} $     | 第 $ t_k $时刻出售老母牛所得金额          |
+| $ w^{(k)}_{大母牛} $     | 第 $ t_k $时刻大母牛所得金额              |
+| $ M $                     | 总贷款金额                                   |
+| $ m $                     | 每年还款额度                                 |
+| $ \alpha $                | 牧草种植所需土地面积（英亩），也指牧草        |
+| $ \beta $                 | 粮食种植所需土地面积（英亩），也指粮食        |
+| $ \gamma $                | 甜菜种植所需土地面积（英亩），也指甜菜         |
+| $ q_{\beta} $  | 粮食的产量                                   |
+| $ q_{\gamma}  $  | 甜菜的产量                                   |
+| $ t_{\beta} $             | 种植粮食所需时间                             |
+| $ t_{\gamma} $            | 种植甜菜所需时间                             |
+| $ t_{小母牛} $        | 饲养小母牛所需时间                           |
+| $ t_{大母牛} $        | 饲养大母牛所需时间                           |
+| $ t $                     | 总时间                                       |
+| $ c_{\beta} $          | 种植粮食的成本                               |
+| $ c_{\gamma} $         | 种植甜菜的成本                               |
+| $ c_{小母牛} $     | 饲养小母牛的成本                             |
+| $ c_{大母牛} $     | 饲养大母牛的成本                             |
+| $ c $                  | 总成本                                       |
+
+​	其中独立参数如下
+
+| 符号变量                 | 含义                                         |
+| :------------------------- | :------------------------------------------- |
+| $ r $                     | 小母牛出售的比例                           |
+| $ M $                     | 总贷款金额                                   |
+| $ \alpha $                | 牧草种植所需土地面积（英亩），也指牧草        |
+| $ \beta $                 | 粮食种植所需土地面积（英亩），也指粮食        |
+| $ \gamma $                | 甜菜种植所需土地面积（英亩），也指甜菜         |
+
+## 模型建立与求解
+
+记$t_{k}$时刻种群中雌性(下文同)各年龄段数量分布向量
+
+$$
+\mathbf{x^{(k)}} = 
+\begin{bmatrix}
+x_1^{(k)} & x_2^{(k)}& \cdots & x_n^{(k)}
+\end{bmatrix}^\mathrm{T}, \quad k = 0, 1, 2, \ldots
+$$
+
+则初始时刻种群数量分布向量为
+
+$$
+\mathbf{x^{(0)}} = 
+\begin{bmatrix}
+x_1^{(0)} & x_2^{(0)} & \cdots & x_n^{(0)}
+\end{bmatrix}^\mathrm{T}
+$$
+
+当不出售第一个年龄组的小母牛，$t_{k}$时刻种群中第一个年龄组的种群数量等于$t_{k-1}$时刻各年龄组产下所有雌性幼体的总和
+
+$$
+x_1^{(\:k\:)}=a_1x_1^{(\:k-1\:)}+a_2x_2^{(\:k-1\:)}+\cdots+a_nx_n^{(\:k-1\:)}\:,\quad k=0 ,1 ,2 ,\cdots
+$$
+
+$t_{k}$时刻第$i+1$个年龄组中雌性奶牛的数量等于$t_{k-1}$时刻第$i$个年龄组中存活下来的雌性奶牛的数量，
+
+$$
+x_{i+1}^{(k)}=b_{i}x_{i}^{(k-1)}\:,\quad i=1\:,2\:,\cdots,n-1\
+$$
+
+遍历上述$n-1$个存活条件，并在最初添加种群数量的繁殖条件公式，有
+
+$$
+\begin{cases}
+x_1^{(k)} = a_1x_1^{(k-1)} + a_2x_2^{(k-1)} + \cdots + a_nx_n^{(k-1)} \:, \\
+x_2^{(k)} = b_1x_1^{(k-1)} \:, 
+\\x_3^{(k)} = b_2x_2^{(k-1)} \:, \\
+\vdots \\
+x_n^{(k)} = b_{n-1}x_{n-1}^{(k-1)} \:.
+\end{cases}
+$$
+
+记上述等式右端系数矩阵为 $L'$，即
+
+$$
+\mathbf{L'}=
+\begin{bmatrix}
+a_{1} & a_{2} & \cdots & a_{n-1} & a_{n} \\
+b_1 & 0 &\cdots & 0 & 0 \\
+0 & b_2 &\cdots & 0 & 0 \\
+\vdots & \vdots & &\vdots & \vdots \\
+0 & 0 & \cdots & b_{n-1} & 0
+\end{bmatrix} \\
+$$
+
+当$t_{k}$时刻出售 $r$ 比例的刚出生的小母牛，即出售小母牛的数量为 $(a_1x_1^{(k-1)} + a_2x_2^{(k-1)} + \cdots + a_nx_n^{(k-1)}) \times r，(k \neq 0)$ , 由此更新第一个年龄段种群雌性数量的迭代公式如下
+
+$$
+x_1^{(k)} = ( a_1x_1^{(k-1)} + a_2x_2^{(k-1)} + \cdots + a_nx_n^{(k-1)} ) \times (1 - r) \\
+$$
+
+此时，有
+
+$$
+\begin{cases}
+x_1^{(k)} = ( a_1x_1^{(k-1)} + a_2x_2^{(k-1)} + \cdots + a_nx_n^{(k-1)} ) \times (1 - r) \:, \\
+x_2^{(k)}=b_1x_1^{(k-1)}\:, 
+\\x_3^{(k)}=b_2x_2^{(k-1)}\:, \\
+\vdots \\
+x_n^{(k)}=b_{n-1}x_{n-1}^{(k-1)}\:.
+\end{cases}
+$$
+
+记上述等式右端系数矩阵为 $\mathbf{L_{r}}$ ，即
+
+$$
+\mathbf{L_{r}}=
+\begin{bmatrix}
+a_{1} \times (1-r) & a_{2} \times (1-r) & \cdots & a_{n-1} \times (1-r) & a_{n} \times (1-r)
+\\b_1 & 0 &\cdots & 0 & 0 \\
+0 & b_2 &\cdots & 0 & 0 \\
+\vdots & \vdots & &\vdots & \vdots \\
+0 & 0 & \cdots & b_{n-1} & 0
+\end{bmatrix} \\
+$$
+
+则$t_{k}$时刻种群数量分布向量递推公式为
+
+$$
+\mathbf{x^{(k)}} = \mathbf{L_{r}} x^{(k-1)} ,\quad k=1 ,2 ,\cdots
+$$
+
+由上式得，
+
+$$
+\mathbf{x}^{(1)} = \mathbf{L_{r}} \mathbf{x}^{(0)},\\
+\mathbf{x}^{(2)}= \mathbf{L_{r}} \mathbf{x}^{(1)}= \mathbf{L_{r}}^{2} \mathbf{x}^{(0)},\\
+\vdots\\
+\mathbf{x}^{(k)} = \mathbf{L_{r}} \mathbf{x}^{(k-1)}= \mathbf{L_{r}}^{k} \mathbf{x}^{(0)} ,\quad k=1 ,2 ,\cdots
+$$
+
+本题初始种群数量分布向量为
+
+$$
+\mathbf{x^{(0)}} = 
+\begin{bmatrix}
+10 & 10 & 10 & 10 & 10 & 10 & 10 & 10 & 10 & 10 & 10 & 10
+\end{bmatrix}^\mathrm{T}
+$$
+
+种群数量分布的莱斯利雌雄总矩阵为
+
+$$
+\mathbf{L^{''}} = 
+\begin{bmatrix}
+0 & 0 & 1.1 & 1.1 & 1.1 & 1.1 & 1.1 & 1.1 & 1.1 & 1.1 & 1.1 & 1.1 \\
+0.95 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 \\
+0 & 0.95 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 \\
+0 & 0 & 0.98 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 \\
+0 & 0 & 0 & 0.98 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 \\
+0 & 0 & 0 & 0 & 0.98 & 0 & 0 & 0 & 0 & 0 & 0 & 0 \\
+0 & 0 & 0 & 0 & 0 & 0.98 & 0 & 0 & 0 & 0 & 0 & 0 \\
+0 & 0 & 0 & 0 & 0 & 0 & 0.98 & 0 & 0 & 0 & 0 & 0 \\
+0 & 0 & 0 & 0 & 0 & 0 & 0 & 0.98 & 0 & 0 & 0 & 0 \\
+0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0.98 & 0 & 0 & 0 \\
+0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0.98 & 0 & 0 \\
+0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0.98 & 0 \\
+\end{bmatrix}
+$$
+
+子代为雌雄的几率各一半，且不考虑出售第一个年龄段的雌性小母牛，种群数量分布的莱斯利雌性矩阵或莱斯利雄性矩阵为
+
+$$
+\mathbf{L'} = 
+\begin{bmatrix}
+0 & 0 & 0.55 & 0.55 & 0.55 & 0.55 & 0.55 & 0.55 & 0.55 & 0.55 & 0.55 & 0.55 \\
+0.95 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 \\
+0 & 0.95 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 \\
+0 & 0 & 0.98 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 \\
+0 & 0 & 0 & 0.98 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 \\
+0 & 0 & 0 & 0 & 0.98 & 0 & 0 & 0 & 0 & 0 & 0 & 0 \\
+0 & 0 & 0 & 0 & 0 & 0.98 & 0 & 0 & 0 & 0 & 0 & 0 \\
+0 & 0 & 0 & 0 & 0 & 0 & 0.98 & 0 & 0 & 0 & 0 & 0 \\
+0 & 0 & 0 & 0 & 0 & 0 & 0 & 0.98 & 0 & 0 & 0 & 0 \\
+0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0.98 & 0 & 0 & 0 \\
+0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0.98 & 0 & 0 \\
+0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0.98 & 0 \\
+\end{bmatrix}
+$$
+
+考虑第一个年龄段的雌性出售比率为$r$ , 种群数量分布的莱斯利雌矩阵应更新为
+
+$$
+\mathbf{L_{r}} = 
+\begin{bmatrix}
+0 & 0 & b' & b' & b' & b' & b' & b' & b' & b' & b' & b' \\
+0.95 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 \\
+0 & 0.95 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 \\
+0 & 0 & 0.98 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 \\
+0 & 0 & 0 & 0.98 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 \\
+0 & 0 & 0 & 0 & 0.98 & 0 & 0 & 0 & 0 & 0 & 0 & 0 \\
+0 & 0 & 0 & 0 & 0 & 0.98 & 0 & 0 & 0 & 0 & 0 & 0 \\
+0 & 0 & 0 & 0 & 0 & 0 & 0.98 & 0 & 0 & 0 & 0 & 0 \\
+0 & 0 & 0 & 0 & 0 & 0 & 0 & 0.98 & 0 & 0 & 0 & 0 \\
+0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0.98 & 0 & 0 & 0 \\
+0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0.98 & 0 & 0 \\
+0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0.98 & 0 \\
+\end{bmatrix}\\
+其中\: , \:b' = 0.55 \times (1-r)
+$$
+
+
+### 小公牛
+
+$t_{k}$时刻出售小公牛所得金额 =  $ t_{k}$时刻出售小公牛数量  $\times$ 一只小公牛的价格
+
+$$
+w^{(k)}_{小公牛} =  \mathbf{L'} \mathbf{x}^{(k-1)} \mathbf{y}_{1} \times 30
+$$
+
+其中
+
+$$
+\mathbf{y}_{1} = 
+\begin{bmatrix}
+1 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0
+\end{bmatrix}
+$$
+
+目的为从前面所得的种群数量分布向量（$ \mathbf{L'} \mathbf{x}^{(k-1)}$）中取出第一个元素，即为待出售的小公牛的数量
+
+$$
+\sum_{k=1}^{5} w^{(k)}_{小公牛} = 30 \sum_{k=1}^{5} ( \mathbf{L'} \mathbf{x}^{(k-1)}  \mathbf{y}_{1})
+$$
+
+### 小母牛
+
+$$
+w^{(k)}_{小母牛} = \mathbf{L'} \mathbf{x}^{(k-1)} \mathbf{y}_{1} r \times 40
+$$
+
+其中
+
+$$
+\mathbf{y}_{1} \times r = 
+\begin{bmatrix}
+r & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0
+\end{bmatrix}
+$$
+
+目的为从前面所得的种群数量分布向量（$x^{(k-1)} \times L$）中取出第一个元素，即小母牛的数量, $r$为出售小母牛的比例
+则 $ x^{(k-1)} \times L \times y_{1} \times r$ 即为待出售小母牛的数量
+
+$$
+\sum_{k=1}^{5} w^{(k)}_{小母牛} = 40 \sum_{k=1}^{5} (\mathbf{x}^{(k-1)} \mathbf{L'} \mathbf{y}_{1} )
+$$
+
+### 老母牛
+
+$$
+w^{(k)}_{老母牛} = \mathbf{x}^{(k-1)} \mathbf{L_{r}} \mathbf{y}_{12} \times 120
+$$
+
+其中
+
+$$
+\mathbf{y}_{12} = 
+\begin{bmatrix}
+0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 1
+\end{bmatrix}
+$$
+
+目的为从前面所得的种群数量分布向量（$x^{(k-1)} \times L$）中取出最后一个元素，即待出售老母牛的数量
+
+$$
+\sum_{k=1}^{5} w^{(k)}_{老母牛} = 120 \sum_{k=1}^{5}(\mathbf{x}^{(k-1)} \mathbf{L_{r}} \mathbf{y}_{12})
+$$
+
+### 大母牛
+
+$$
+w^{(k)}_{大母牛} = \mathbf{x}^{(k-1)} \mathbf{L_{r}} \mathbf{y}_{3,12} \times 370
+$$
+
+其中
+
+$$
+\mathbf{y}_{3,12} \times r = 
+\begin{bmatrix}
+0 & 0 & 1 & 1 & 1 & 1 & 1 & 1 & 1 & 1 & 1 & 1
+\end{bmatrix}
+$$
+
+目的为从前面所得的种群数量分布向量（$x^{(k-1)} \times L$）中取出第三至第十二个元素，即为能正常产奶的奶牛数量
+
+$$
+c_{大母牛} = 370 \sum_{k=0}^{5} (\mathbf{x}^{(k-1)} \mathbf{L_{r}} \mathbf{y}_{3,12})
+$$
+
+### 贷款
+
+设总贷款金额为$M$,贷款金额全部用于投资,此时，有
+
+$$
+\sum_{i=1}^{12} x_{i}^{(\:k\:)} \leq \frac{M}{200}+130 \: , \: k = 0, \ldots, 5 \\
+M \leq 200 \times ( 45+ \sum_{i=1}^{2} x_{1}^{(\:5\:)} )
+$$
+
+至于还款,要求等额还款,市面上流行的还款方式为等额本金还款及等额本息还款，但仅有后者可保证每年还款数额固定不变，故确定还款方式为等额本息还款
+有，
+$$
+\text{每年应还额度} = \frac{贷款本金 \times 年利率 \times (1 + 年利率)^{还款年数}}{(1 + 年利率)^{还款年数} - 1}
+$$
+
+则，每年还款额度 $m$ 计算公式如下
+
+$$
+m = \frac{M \times 0.15 \times (1 + 0.15)^{10}}{(1 + 0.15)^{10} - 1}
+$$
+
+### 土地
+
+设牧草，甜菜，粮食种植所需土地分别为 $\alpha英亩,\beta英亩,\gamma英亩$
+由题意知，每头小母牛需要$\frac{2}{3}$英亩的土地养活它，每头大母牛需要1英亩的土地养活它，然每头奶牛除了吃牧草以外，每年还需要0.6吨粮食和0.7吨甜菜. 即现有的200英亩土地分配$\beta英亩,\gamma英亩$分别种植甜菜和粮食外，剩余$\alpha$英亩土地均布满牧草
+
+#### 分牧草$\alpha$英亩
+
+$$
+\alpha \geq \frac{2}{3} \times \sum_{i=1}^{2} x_{i}^{(k)} + 1 \times \sum_{i=3}^{12} x_{i}^{(k)} \\
+$$
+
+#### 分粮食$\beta$英亩
+
+$$
+\beta = \beta_{1} + \beta_{2} + \beta_{3} + \beta_{4}\\
+q_{\beta} = 1.1 \times \beta_{1} + 0.9 \times \beta_{2} + 0.8 \times \beta_{3} + 0.6 \times \beta_{4}\\
+
+l_{\beta} = q_{\beta} - 0.6 \times \sum_{i=2}^{12} x_{i}^{(\:k\:)} \\
+if \quad l_{\beta} \gt 0 \: , \: then \quad w_{\beta} = l_{\beta} \times 75 \\
+if \quad l_{\beta} \lt 0 \: , \: then \quad w_{\beta} = l_{\beta} \times 90 \\
+
+\beta_{1} \leq 20 \: , \\
+\beta_{2} \leq 30 \: , \\
+\beta_{3} \leq 30 \: , \\
+\beta_{4} \leq 10 \: . \\
+$$
+
+### 分甜菜$\gamma$英亩
+
+$$
+q_{\gamma}  = 1.5 \times \gamma\\
+l_{\gamma} = q_{\gamma} - 0.7 \times \sum_{i=3}^{12} x_{i}^{(\:k\:)} \\
+if \quad l_{\gamma} > 0\: , \: then \quad w_{\gamma} = l_{\gamma} \times 58 \\ 
+if \quad l_{\gamma} < 0\: , \: then \quad w_{\gamma} = l_{\gamma} \times 70 \\
+$$
+
+#### 总土地大小限制
+
+$$
+\alpha + \beta + \gamma \leq 200
+$$
+
+### 时间
+
+$$
+t_{小母牛} = \sum_{i=1}^{2} x_{i}^{(k)} \times 10 \: , \: k = 0,1,2,3,4. \\
+t_{大母牛} = \sum_{i=3}^{12} x_{i}^{(k)} \times 42 \: , \: k = 0,1,2,3,4. \\
+t_{\beta} = \alpha \times 4 \\
+t_{\gamma} = \beta \times 14 \\
+t = t_{小母牛} + t_{大母牛} + t_{\beta} + t_{\gamma} \\
+if \quad t \leq 5500 \: , \: then \quad c_{工人} = 4000 \\
+\quad \quad \quad \quad \quad \quad \quad \quad if \quad t \geq 5500 \: , \: then \quad c_{工人} = 4000 + (t-5500) \times 1.2
+$$
+
+### 资金
+
+$$
+c_{小母牛} = 500 \times \sum_{i=1}^{2} x_{i}^{(k)} \: , \: k = 0,1,2,3,4.\\
+c_{大母牛} = 100 \times \sum_{i=3}^{12} x_{i}^{(k)} \: , \: k = 0,1,2,3,4.\\
+c_{\beta} = \beta \times 15\\
+c_{\gamma} = \gamma \times 10
+$$
+
+### 优化目标
+
+年成本（支出）：
+
+$$
+c_{年} = c_{\beta} + c_{\gamma} + c_{小母牛} + c_{大母牛} + c_{工人} + m
+$$
+
+年毛利（收入）：
+
+$$
+w_{年} = w^{(k)}_{小公牛} + w^{(k)}_{小母牛} + w^{(k)}_{大母牛} + w^{(k)}_{老母牛} + w_{\beta} + w_{\gamma}
+$$
+
+年利润（优化目标）：
+
+$$
+E_{年} = w_{年} - c_{年}
+$$
+
+### 其他限制条件
+
+$$
+\sum_{i=3}^{12} x_{i}^{(\:5\:)} >=50
+$$
+
+$$
+\sum_{i=3}^{12} x_{i}^{(\:5\:)} <= 175
+$$
+
+### $种群数量（n）- 出售比例(r)$图
+
+| 年份 | 种群总数                                       |
+| :--: | :--------------------------------------------- |
+|  0   | 120                                            |
+|  1   | 162.2 - 55.0r                                  |
+|  2   | 201.152 - 105.985r                             |
+|  3   | 236.87934 - 153.0276r                          |
+|  4   | 27.300625r² - 247.585052r + 293.2354506        |
+|  5   | 79.362916875r² - 385.097726255r + 368.18760454 |
+
+![](E:\LGRepository\China-Undergraduate-Mathematical-Contest-in-Modeling\第一次模拟训练A题\Python处理代码\Ideations\5 年内总牛群数量随r的变化.png)
+
+![](E:\LGRepository\China-Undergraduate-Mathematical-Contest-in-Modeling\第一次模拟训练A题\Python处理代码\Ideations\r递增的羊群数量变化-直方图.png)
+
+### 算法实现
+
+```python
+import numpy as np
+from scipy.optimize import differential_evolution
+
+
+class Cattle:
+    def __init__(self, x0, birth_rates, survival_rates, alpha, betas, gamma, r, M, years):
+        self.x0 = np.array(x0)                    # 初始种群分布
+        self.xs = [self.x0.copy()]                # 种群分布历史记录
+        self.birth_rates = np.array(birth_rates)  
+        self.survival_rates = np.array(survival_rates)
+        self.alpha = alpha                        # 种植牧草
+        self.betas = np.array(betas)              # 种植粮食
+        self.gamma = gamma                        # 种植甜菜
+        self.r = r                                # 小母牛出售率
+        self.M = M                                # 贷款投资
+        self.m = self.calculate_m(M)              # 年度固定成本
+        self.years = years                        # 模拟年数
+        self.n = len(x0)                          # 种群年龄组数量
+        self.L_pp = self.create_L_pp()            # 种群转移矩阵 (所有)
+        self.L_p = np.vstack([self.L_pp[0, :] * 0.5, self.L_pp[1:, :]])    # 种群转移矩阵 (公牛 或 母牛)
+        self.L_r = np.vstack([self.L_p[0, :] * (1 - r), self.L_p[1:, :]])  # 种群转移矩阵 (考虑小母牛出售)
+        self.y_1 = np.zeros(self.n); self.y_1[0] = 1                       # 用于选择第一年龄组的向量
+        self.y_12 = np.zeros(self.n); self.y_12[-1] = 1                    # 用于选择最后一年龄组的向量
+        self.y_1_2 = np.zeros(self.n); self.y_1_2[0:2] = 1                 # 用于选择前两个年龄组的向量
+        self.y_3_12 = np.zeros(self.n); self.y_3_12[2:] = 1                # 用于选择3-12年龄组的向量
+        self.reset_metrics()                      # 重置所有指标
+
+    def calculate_m(self, M):
+        # 计算年度还款金额
+        return (M * 0.15 * (1 + 0.15)**10) / ((1 + 0.15)**10 - 1)
+
+    def create_L_pp(self):
+        # 创建种群转移矩阵
+        L_pp = np.zeros((self.n, self.n))
+        L_pp[0, :] = self.birth_rates
+        for i in range(1, self.n):
+            L_pp[i, i-1] = self.survival_rates[i-1]
+        return L_pp
+
+    def reset_metrics(self):
+        # 重置所有指标为初始状态
+        self.alpha_values = np.array([self.alpha])
+        self.betas_values = np.array([self.betas])
+        self.gamma_values = np.array([self.gamma])
+        self.q_betas_values = np.array([0])
+        self.q_gammas_values = np.array([0])
+        self.l_betas_values = np.array([0])
+        self.l_gammas_values = np.array([0])
+        self.w_betas_values = np.array([0])
+        self.w_gammas_values = np.array([0])
+        self.c_xiaomunius_values = np.array([0])
+        self.c_damunius_values = np.array([0])
+        self.c_betas_values = np.array([0])
+        self.c_gammas_values = np.array([0])
+        self.t_xiaomunius_values = np.array([0])
+        self.t_damunius_values = np.array([0])
+        self.t_betas_values = np.array([0])
+        self.t_gammas_values = np.array([0])
+        self.t_totals_values = np.array([0])
+        self.c_workers_values = np.array([0])
+        self.num_xiaogongniu_sales_values = np.array([0])
+        self.num_xiaomuniu_sales_values = np.array([0])
+        self.num_damuniu_sales_values = np.array([0])
+        self.num_laomuniu_sales_values = np.array([0])
+        self.w_xiaogongniu_values = np.array([0])
+        self.w_xiaomuniu_values = np.array([0])
+        self.w_damuniu_values = np.array([0])
+        self.w_laomuniu_values = np.array([0])
+        self.w_years_values = np.array([0])
+        self.c_years_values = np.array([0])
+        self.E_years_values = np.array([0])
+
+    def simulate(self):
+        # 模拟牧场运营
+        for year in range(self.years):
+            x = self.xs[-1]
+            self.update_metrics(x)
+            if year < self.years:
+                self.update_x()
+        
+        return self.calculate_total_profit(), np.array(self.xs)
+    
+    def validate(self):
+        # 验证最优参数
+        for year in range(self.years):
+            x = self.xs[-1]
+            self.update_metrics(x)
+            if year < self.years:
+                self.update_x()
+        
+        return self.calculate_total_profit(), np.array(self.xs)
+
+    def update_metrics(self, x):
+        # 更新所有指标
+        alpha = self.alpha
+        beta1, beta2, beta3, beta4 = self.betas
+        gamma = self.gamma
+        
+        q_beta = beta1 * 1.1 + beta2 * 0.9 + beta3 * 0.8 + beta4 * 0.6
+        q_gamma = 1.5 * gamma
+        l_beta = q_beta - 0.6 * np.sum(x[2:12])
+        l_gamma = q_gamma - 0.7 * np.sum(x[2:12])
+        
+        w_beta = l_beta * 75 if l_beta > 0 else l_beta * 90
+        w_gamma = l_gamma * 58 if l_gamma > 0 else l_gamma * 70
+    
+        self.alpha_values = np.append(self.alpha_values, alpha)
+        self.betas_values = np.vstack([self.betas_values, [beta1, beta2, beta3, beta4]])
+        self.gamma_values = np.append(self.gamma_values, gamma)
+        self.q_betas_values = np.append(self.q_betas_values, q_beta)
+        self.q_gammas_values = np.append(self.q_gammas_values, q_gamma)
+        self.l_betas_values = np.append(self.l_betas_values, l_beta)
+        self.l_gammas_values = np.append(self.l_gammas_values, l_gamma)
+        self.w_betas_values = np.append(self.w_betas_values, w_beta)
+        self.w_gammas_values = np.append(self.w_gammas_values, w_gamma)
+    
+        num_xiaogongniu_sales = np.floor(self.L_p @ x @ self.y_1).astype(int)
+        num_xiaomuniu_sales = np.floor(self.L_p @ x @ self.y_1 * self.r).astype(int)
+        num_damuniu_sales = np.floor(self.L_r @ x @ self.y_3_12).astype(int)
+        num_laomuniu_sales = np.floor(self.L_r @ x @ self.y_12).astype(int)
+    
+        self.num_xiaogongniu_sales_values = np.append(
+            self.num_xiaogongniu_sales_values, num_xiaogongniu_sales)
+        self.num_xiaomuniu_sales_values = np.append(
+            self.num_xiaomuniu_sales_values, num_xiaomuniu_sales)
+        self.num_damuniu_sales_values = np.append(
+            self.num_damuniu_sales_values, num_damuniu_sales)
+        self.num_laomuniu_sales_values = np.append(
+            self.num_laomuniu_sales_values, num_laomuniu_sales)
+    
+        self.w_xiaogongniu_values = np.append(
+            self.w_xiaogongniu_values, 30 * num_xiaogongniu_sales)
+        self.w_xiaomuniu_values = np.append(
+            self.w_xiaomuniu_values, 40 * num_laomuniu_sales)
+        self.w_damuniu_values = np.append(
+            self.w_damuniu_values, 370 * num_damuniu_sales)
+        self.w_laomuniu_values = np.append(
+            self.w_laomuniu_values, 120 * num_laomuniu_sales)
+    
+        self.t_xiaomunius_values = np.append(
+            self.t_xiaomunius_values, 10 * x @ self.y_1_2)
+        self.t_damunius_values = np.append(
+            self.t_damunius_values, 42 * x @ self.y_3_12)
+        self.t_betas_values = np.append(
+            self.t_betas_values, 4 * (beta1 + beta2 + beta3 + beta4))
+        self.t_gammas_values = np.append(self.t_gammas_values, 14 * gamma)
+        self.t_totals_values = np.append(
+            self.t_totals_values, 
+            10 * x @ self.y_1_2 + 42 * x @ self.y_3_12 + 
+            4 * (beta1 + beta2 + beta3 + beta4) + 14 * gamma
+        )
+    
+        self.c_xiaomunius_values = np.append(
+            self.c_xiaomunius_values, 500 * x @ self.y_1_2)
+        self.c_damunius_values = np.append(
+            self.c_damunius_values, 100 * x @ self.y_3_12)
+        self.c_betas_values = np.append(
+            self.c_betas_values, 15 * (beta1 + beta2 + beta3 + beta4))
+        self.c_gammas_values = np.append(self.c_gammas_values, 10 * gamma)
+        self.c_workers_values = np.append(
+            self.c_workers_values, 
+            4000 if self.t_totals_values[-1] <= 5500 
+            else 4000 + 1.2 * (self.t_totals_values[-1] - 5500)
+        )
+    
+        self.w_years_values = np.append(
+            self.w_years_values, 
+            np.sum([
+                self.w_xiaogongniu_values[-1], self.w_xiaomuniu_values[-1], 
+                self.w_damuniu_values[-1], self.w_laomuniu_values[-1], 
+                self.w_betas_values[-1], self.w_gammas_values[-1]
+            ])
+        )
+        
+        self.c_years_values = np.append(
+            self.c_years_values, 
+            np.sum([
+                self.c_betas_values[-1], self.c_gammas_values[-1], 
+                self.c_xiaomunius_values[-1], self.c_damunius_values[-1], 
+                self.c_workers_values[-1], self.m
+            ])
+        )
+        
+        self.E_years_values = np.append(
+            self.E_years_values, 
+            self.w_years_values[-1] - self.c_years_values[-1]
+        )
+
+    def update_x(self):
+        # 更新种群分布
+        x = self.L_r @ self.xs[-1]
+        self.xs.append(np.maximum((np.floor(x)).astype(int), 0))
+        
+    def calculate_total_profit(self):
+        # 计算总利润
+        return np.sum(self.E_years_values)
+
+if __name__ == '__main__':
+    
+    def objective_function(params):
+        r, M, alpha, beta1, beta2, beta3, beta4, gamma = params
+    
+        cattle = Cattle(
+            x0=np.ones(12) * 10,
+            birth_rates=np.array([0., 0., 1.1, 1.1, 1.1, 1.1, 1.1, 1.1, 1.1, 1.1, 1.1, 1.1]),
+            survival_rates=np.array([0.95, 0.95, 0.98, 0.98, 0.98, 0.98, 0.98, 0.98, 0.98, 0.98, 0.98]),
+            alpha=alpha,
+            betas=[beta1, beta2, beta3, beta4],
+            gamma=gamma,
+            r=r,
+            M=M,
+            years=5
+        )
+        
+        profit, xs = cattle.simulate()
+        
+        penalty = 0
+        xs = np.array(xs)
+    
+        for t in range(len(xs)):
+            x = xs[t]
+            
+            # 约束1：牛舍数量大于牛数
+            constraint1 = (M / 200 + 130) - np.sum(x)
+            if constraint1 < 0:
+                penalty += abs(constraint1) * 1000
+    
+            # 约束2：牧草面积下限
+            constraint2 = alpha - (2/3 * np.sum(x[:2]) + np.sum(x[2:]))
+            if constraint2 < 0:
+                penalty += abs(constraint2) * 1000
+    
+            # 约束3：土地面积上限
+            constraint3 = 200 - (alpha + beta1 + beta2 + beta3 + beta4 + gamma)
+            if constraint3 < 0:
+                penalty += abs(constraint3) * 1000
+    
+            # 约束4：成年母牛数量下限（仅在最后一年检查）
+            if t == len(xs) - 1:
+                constraint4 = np.sum(x[2:]) - 50
+                if constraint4 < 0:
+                    penalty += abs(constraint4) * 2000  # 增加约束4的惩罚权重
+    
+            # 约束5：成年母牛数量上限（仅在最后一年检查）
+            if t == len(xs) - 1:
+                constraint5 = 175 - np.sum(x[2:])
+                if constraint5 < 0:
+                    penalty += abs(constraint5) * 1000
+    
+            # 约束6：各年龄组牛的数量为非负整数
+            if not (np.all(x >= 0) and np.all(x == np.floor(x))):
+                penalty += 1000
+    
+        # 约束7：各种植面积为非负数
+        if not (alpha >= 0 and beta1 >= 0 and beta2 >= 0 and beta3 >= 0 and beta4 >= 0 and gamma >= 0):
+            penalty += 1000
+    
+        # 约束8：小母牛出售率在0到1之间
+        if not (0 <= r <= 1):
+            penalty += 1000
+    
+        return -profit + penalty
+    
+    def validate_results(cattle, optimal_params):
+        r, M, alpha, beta1, beta2, beta3, beta4, gamma = optimal_params
+        final_profit, xs_final = cattle.validate()
+        
+        print(f"\n年度利润:\n{cattle.E_years_values}")
+        print(f"\nAlpha 值:\n{cattle.alpha_values}")
+        print(f"\nBeta 值:\n{cattle.betas_values}")
+        print(f"\nGamma 值:\n{cattle.gamma_values}")
+        print(f"\n使用最优参数的最终利润:\n{final_profit}")
+    
+        penalty_check = 0
+        constraint_violations = {i: 0 for i in range(1, 9)}
+    
+        for t in range(len(xs_final)):
+            x = xs_final[t]
+    
+            if not ((M / 200 + 130) - np.sum(x) >= 0):
+                penalty_check += 10000
+                constraint_violations[1] += 1
+    
+            if not (alpha - (2/3 * np.sum(x[:2]) + np.sum(x[2:])) >= 0):
+                penalty_check += 10000
+                constraint_violations[2] += 1
+    
+            if not (200 - (alpha + beta1 + beta2 + beta3 + beta4 + gamma) >= 0):
+                penalty_check += 10000
+                constraint_violations[3] += 1
+    
+            if t == len(xs_final) - 1:
+                if not (np.sum(x[2:]) - 50 >= 0):
+                    penalty_check += 10000
+                    constraint_violations[4] += 1
+    
+            if t == len(xs_final) - 1:
+                if not (175 - np.sum(x[2:]) >= 0):
+                    penalty_check += 10000
+                    constraint_violations[5] += 1
+    
+            if not (np.all(x >= 0) and np.all(x == np.floor(x))):
+                penalty_check += 10000
+                constraint_violations[6] += 1
+    
+        if not (alpha >= 0 and beta1 >= 0 and beta2 >= 0 and beta3 >= 0 and beta4 >= 0 and gamma >= 0):
+            penalty_check += 10000
+            constraint_violations[7] += 1
+    
+        if not (0 <= r <= 1):
+            penalty_check += 10000
+            constraint_violations[8] += 1
+    
+        if penalty_check > 0:
+            print("最终结果不符合所有约束条件，存在惩罚。")
+            print(f"总惩罚: {penalty_check}")
+            print("约束条件违反情况:")
+            for constraint, violations in constraint_violations.items():
+                if violations > 0:
+                    print(f"约束{constraint}被违反 {violations} 次")
+            print(f"\n特别注意: 约束4 (成年母牛数量下限) 被违反 {constraint_violations[4]} 次")
+        else:
+            print("最终结果符合所有约束条件。")
+    
+        return final_profit, constraint_violations
+
+    bounds = [
+        (0, 1),                     # r: 小母牛出售率
+        (0, 1000000),               # M: 贷款投资
+        (2/3*20+100, 200),          # alpha: 种植牧草
+        (0, 20),                    # beta1: 种植粮食
+        (0, 30),                    # beta2: 种植粮食
+        (0, 30),                    # beta3: 种植粮食
+        (0, 10),                    # beta4: 种植粮食
+        (0, 200- (2/3*20+100))      # gamma: 种植甜菜
+    ]
+    
+    def callback(xk, convergence):
+        print(f"当前最优参数: {xk}")
+        print(f"当前收敛度: {convergence}")
+        print("---")
+
+    print("开始优化过程...")
+    
+    result = differential_evolution(objective_function, bounds, callback=callback, disp=True, popsize=20, maxiter=1000)
+    
+    print("\n优化完成!")
+    print(f"最优参数: \n{result.x}")
+    print(f"最大利润: \n{-result.fun}")
+
+    optimal_params = result.x
+    r, M, alpha, beta1, beta2, beta3, beta4, gamma = optimal_params
+
+    print("\n使用最优参数进行最终验证...")
+
+    cattle_opt = Cattle(
+        x0=np.ones(12) * 10,
+        birth_rates=np.array([0., 0., 1.1, 1.1, 1.1, 1.1, 1.1, 1.1, 1.1, 1.1, 1.1, 1.1]),
+        survival_rates=np.array([0.95, 0.95, 0.98, 0.98, 0.98, 0.98, 0.98, 0.98, 0.98, 0.98, 0.98]),
+        alpha=alpha,
+        betas=[beta1, beta2, beta3, beta4],
+        gamma=gamma,
+        r=r,
+        M=M,
+        years=5
+    )
+
+    final_profit, constraint_violations = validate_results(cattle_opt, optimal_params)
+
+    if constraint_violations[4] > 0:
+        print("\n约束4 (成年母牛数量下限) 不满足,详细信息:")
+        print(f"最后一年成年母牛数量: {np.sum(cattle_opt.xs[-1][2:])}")
+        print("要求的最小数量: 50")
+        print("建议: 可能需要调整参数以增加成年母牛数量,比如降低小母牛出售率或增加牧草面积。")
+```
+
+### 输出结果
+
+```
+differential_evolution step 130: f(x)= -51619.310215964215
+当前最优参数: [8.27092734e-01 3.02080433e+01 1.13339062e+02 1.76580610e+01
+ 2.59276821e+00 5.12249914e-02 7.68038112e-02 6.61242345e+01]
+当前收敛度: 0.8988691699217032
+---
+differential_evolution step 131: f(x)= -51619.310215964215
+当前最优参数: [8.27092734e-01 3.02080433e+01 1.13339062e+02 1.76580610e+01
+ 2.59276821e+00 5.12249914e-02 7.68038112e-02 6.61242345e+01]
+当前收敛度: 0.8936711540647668
+---
+differential_evolution step 132: f(x)= -51619.310215964215
+当前最优参数: [8.27092734e-01 3.02080433e+01 1.13339062e+02 1.76580610e+01
+ 2.59276821e+00 5.12249914e-02 7.68038112e-02 6.61242345e+01]
+当前收敛度: 0.8935676384876899
+---
+differential_evolution step 133: f(x)= -51619.310215964215
+当前最优参数: [8.27092734e-01 3.02080433e+01 1.13339062e+02 1.76580610e+01
+ 2.59276821e+00 5.12249914e-02 7.68038112e-02 6.61242345e+01]
+当前收敛度: 0.8935676384876899
+---
+differential_evolution step 134: f(x)= -51619.310215964215
+当前最优参数: [8.27092734e-01 3.02080433e+01 1.13339062e+02 1.76580610e+01
+ 2.59276821e+00 5.12249914e-02 7.68038112e-02 6.61242345e+01]
+当前收敛度: 0.8921909172931776
+---
+differential_evolution step 135: f(x)= -51619.310215964215
+当前最优参数: [8.27092734e-01 3.02080433e+01 1.13339062e+02 1.76580610e+01
+ 2.59276821e+00 5.12249914e-02 7.68038112e-02 6.61242345e+01]
+当前收敛度: 0.9038656606567419
+
+Polishing solution with 'L-BFGS-B'
+
+优化完成!
+最优参数: 
+[8.27092734e-01 3.02062973e+01 1.13339062e+02 1.76621609e+01
+ 2.64074873e+00 1.03654878e-01 9.41758652e-02 6.61601972e+01]
+ 
+最大利润: 
+51669.043189123186
+
+
+
+
+
+使用最优参数进行最终验证...
+
+新生小母牛的出售比例:
+0.8279516832078201
+
+贷款金额:
+38.45595877285814
+
+每年应还额度:
+7.6624291015831965
+
+年度利润:
+8304.654954081157
+
+Alpha 值:
+113.40429240527251
+
+Beta 值:
+[18.69727469  4.39040198  0.02970253  0.0786084 ]
+
+Gamma 值:
+63.288584506966316
+
+使用最优参数的最终利润:
+51504.96262489787
+
+上述结果符合各约束条件。
+```
+

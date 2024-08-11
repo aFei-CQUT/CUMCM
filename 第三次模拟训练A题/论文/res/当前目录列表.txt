@@ -1,0 +1,10 @@
+当前目录: E:\LaTeX Now\res
+文件和目录列表:
+1_bar_plot.png
+2_box_plot.png
+3_area_plot.png
+CSV数据收集列表.png
+flowchart.png
+list_files.py
+世界银行集团.png
+当前目录列表.txt

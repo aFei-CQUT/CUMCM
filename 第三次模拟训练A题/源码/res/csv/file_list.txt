@@ -1,0 +1,15 @@
+当前目录: E:\LGRepository\CUMCM\第三次模拟训练A题\csv
+文件和目录列表:
+CPI（2010 年 = 100）.csv
+file_list.txt
+GDP 增长率.csv
+GDP（不变价本币单位）.csv
+GNI （不变价本币单位）.csv
+IR    （以CPI为指数）.csv
+list_files.py
+M2 增长率（百分比）.csv
+M2 （现价本币单位）.csv
+存款利率 (百分比).csv
+实际利率 (百分比).csv
+总失业人数（占劳动力总数的比例）.csv
+贷款利率 (百分比).csv

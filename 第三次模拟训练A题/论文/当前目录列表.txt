@@ -1,0 +1,14 @@
+当前目录: E:\LaTeX Now
+文件和目录列表:
+.gitignore
+.vscode
+clean_latex_auxiliary_files.py
+contents.py
+LICENSE
+list_files.py
+parper.pdf
+parper.tex
+README.md
+res
+src
+当前目录内容.txt

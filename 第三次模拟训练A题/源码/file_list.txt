@@ -1,0 +1,12 @@
+当前目录: E:\LGRepository\CUMCM\第三次模拟训练A题\源码
+文件和目录列表:
+file_list.txt
+list_files.py
+pd_plot.py
+problem_0.py
+problem_1.py
+problem_2-流程示意.py
+problem_2.py
+problem_3.py
+problem_4.py
+res

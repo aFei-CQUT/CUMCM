@@ -1,0 +1,1382 @@
+目录结构:
+|-- 文件: .gitignore
+|-- 文件夹: .vscode
+|   |-- 文件: settings.json
+|-- 文件: clean_latex_auxiliary_files.py
+|-- 文件: contents.py
+|-- 文件: LICENSE
+|-- 文件: list_files.py
+|-- 文件: parper.pdf
+|-- 文件: parper.tex
+|-- 文件: README.md
+|-- 文件夹: res
+|   |-- 文件: 1_bar_plot.png
+|   |-- 文件: 2_box_plot.png
+|   |-- 文件: 3_area_plot.png
+|   |-- 文件: 4.png
+|-- 文件夹: src
+|   |-- 文件: A-Cover.tex
+|   |-- 文件: B-Analysis.tex
+|   |-- 文件: C-Solution.tex
+|   |-- 文件: D-Material.tex
+|   |-- 文件: E-Reference.bib
+|   |-- 文件: F-Define.sty
+|-- 文件: 当前目录内容.txt
+|-- 文件: 当前目录列表.txt
+
+
+================================================================================
+E:\LaTeX Now\.gitignore 的内容:
+================================================================================
+build
+
+
+
+
+================================================================================
+E:\LaTeX Now\clean_latex_auxiliary_files.py 的内容:
+================================================================================
+import os
+import glob
+
+def clean_latex_files(directory='.'):
+    # 定义要删除的文件扩展名列表
+    extensions_to_delete = [
+        '*.aux', '*.log', '*.out', '*.toc', '*.lof', '*.lot', 
+        '*.blg', '*.synctex.gz', '*.fls', '*.fdb_latexmk','*.bbl'
+    ]
+
+    # 遍历目录及子目录
+    for root, dirs, files in os.walk(directory):
+        for ext in extensions_to_delete:
+            files_to_delete = glob.glob(os.path.join(root, ext))
+            for file in files_to_delete:
+                try:
+                    os.remove(file)
+                    print(f"已删除: {file}")
+                except Exception as e:
+                    print(f"删除 {file} 时出错: {e}")
+
+if __name__ == "__main__":
+    # 获取当前目录
+    current_dir = os.getcwd()
+    
+    # 执行清理
+    clean_latex_files(current_dir)
+    print("LaTeX辅助文件清理完成。")
+
+
+
+
+
+================================================================================
+E:\LaTeX Now\contents.py 的内容:
+================================================================================
+import os
+from pathlib import Path
+
+IGNORE_EXTENSIONS = [
+    '.pyc', '.md', '.png', '.idx', '.pack', '.rev', '.sample', 'jpg', '.xmind', 'pdf'
+]
+
+IGNORE_FILES = [
+    '.gitattributes', '.ignore', 'LICENSE'
+]
+
+def generate_directory_structure(startpath, indent=''):
+    structure = ""
+    path = Path(startpath)
+    if not any(path.iterdir()):
+        structure += f"{indent}|-- (空目录)\n"
+    else:
+        for item in path.iterdir():
+            if item.is_dir():
+                structure += f"{indent}|-- 文件夹: {item.name}\n"
+                structure += generate_directory_structure(item, indent + '|   ')
+            else:
+                structure += f"{indent}|-- 文件: {item.name}\n"
+    return structure
+
+def write_directory_contents_to_file(output_file_name):
+    # 获取当前脚本所在的目录
+    current_dir = os.path.dirname(os.path.abspath(__file__))
+    
+    # 构建输出文件路径
+    output_file_path = os.path.join(current_dir, output_file_name)
+
+    with open(output_file_path, 'w', encoding='utf-8') as output_file:
+        # 写入目录结构
+        directory_structure = generate_directory_structure(current_dir)
+        output_file.write("目录结构:\n")
+        output_file.write(directory_structure)
+        output_file.write("\n\n")
+
+        # 遍历当前目录
+        for root, dirs, files in os.walk(current_dir):
+            dirs[:] = [d for d in dirs if d != '.git']
+            files = [f for f in files if not (
+                any(f.endswith(ext) for ext in IGNORE_EXTENSIONS) or
+                f in IGNORE_FILES
+            )]
+            for file in files:
+                file_path = os.path.join(root, file)
+                try:
+                    with open(file_path, 'r', encoding='utf-8') as f:
+                        content = f.read()
+                except (UnicodeDecodeError, IsADirectoryError):
+                    try:
+                        with open(file_path, 'r', encoding='latin1') as f:
+                            content = f.read()
+                    except (UnicodeDecodeError, IsADirectoryError):
+                        continue
+                
+                marker = "=" * 80
+                output_file.write(f"{marker}\n")
+                output_file.write(f"{file_path} 的内容:\n")
+                output_file.write(f"{marker}\n")
+                output_file.write(content)
+                output_file.write("\n\n\n\n\n")
+
+if __name__ == "__main__":
+    output_file_name = "当前目录内容.txt"
+    write_directory_contents_to_file(output_file_name)
+
+
+
+
+
+================================================================================
+E:\LaTeX Now\list_files.py 的内容:
+================================================================================
+import os
+
+# 获取当前工作目录
+current_directory = os.getcwd()
+
+# 列出当前目录中的所有文件和子目录
+files_and_dirs = os.listdir(current_directory)
+
+# 定义输出文件的路径
+output_file_path = os.path.join(current_directory, '当前目录列表.txt')
+
+# 将文件和目录列表写入文本文件
+with open(output_file_path, 'w', encoding='utf-8') as file:
+    file.write("当前目录: {}\n".format(current_directory))
+    file.write("文件和目录列表:\n")
+    for item in files_and_dirs:
+        file.write("{}\n".format(item))
+
+print(f"文件和目录列表已保存到 '{output_file_path}'。")
+
+
+
+
+
+================================================================================
+E:\LaTeX Now\parper.tex 的内容:
+================================================================================
+\documentclass[12pt, UTF8, a4paper]{ctexart} % 如果使用 ctexart 文档类，不需要再单独加载 ctex 包
+
+\usepackage{src/F-Define}
+
+\begin{document}
+
+\include{src/A-Cover.tex}
+\include{src/B-Analysis.tex}
+\include{src/C-Solution.tex}
+\include{src/D-Material.tex}
+
+\end{document}
+
+
+
+
+
+================================================================================
+E:\LaTeX Now\当前目录内容.txt 的内容:
+================================================================================
+
+
+
+
+
+================================================================================
+E:\LaTeX Now\当前目录列表.txt 的内容:
+================================================================================
+当前目录: E:\LaTeX Now
+文件和目录列表:
+.gitignore
+.vscode
+clean_latex_auxiliary_files.py
+contents.py
+LICENSE
+list_files.py
+parper.pdf
+parper.tex
+README.md
+res
+src
+当前目录内容.txt
+
+
+
+
+
+================================================================================
+E:\LaTeX Now\.vscode\settings.json 的内容:
+================================================================================
+{
+    // 将默认编译器改为 xelatex，这样在代码环境中就可以输入中文了
+    "latex-workshop.latex.recipe.default": "latexmk (xelatex)",
+
+    // 将tex编译pdf时产生的中间文件存放到build目录中，与此同时，.gitignore文件会告诉git忽略该文件夹
+    "latex-workshop.latex.outDir": "%DIR%/build"
+}
+
+
+
+
+================================================================================
+E:\LaTeX Now\src\A-Cover.tex 的内容:
+================================================================================
+\thispagestyle{empty}   % 定义起始页的页眉页脚格式为 empty —— 空，也就没有页眉页脚
+
+\begin{center}
+    \textbf{\fontsize{20}{1.5}这里是论文标题}
+
+    \textbf{摘　要}
+\end{center}
+
+% ==================================================
+% @brief    论文摘要
+% ==================================================
+
+%\newline \newline
+
+% \newline 与 \\效果相同 
+% \linebreak 强制换行
+
+\textbf{关键词}： \quad  \quad 
+
+
+
+
+
+================================================================================
+E:\LaTeX Now\src\B-Analysis.tex 的内容:
+================================================================================
+% 设置页码计数器为 1 （也就是当前页面为第一页）
+\setcounter{page}{1}
+
+% ==================================================
+% @brief    问题重述
+% ==================================================
+
+\mcmSection{问题重述}
+
+\mcmSubsection{问题背景}
+
+这里是问题背景。
+
+\mcmSubsection{问题重述}
+
+这里是问题重述。
+
+
+% ==================================================
+% @brief    问题分析
+% ==================================================
+
+\mcmSection{问题分析}
+
+\mcmSubsection{分析}
+
+这里是问题分析。
+
+
+% ==================================================
+% @brief    模型假设
+% ==================================================
+
+\mcmSection{模型假设}
+
+\begin{enumerate}
+    \item 这里是假设一
+    \item 这里是假设二
+    \item 这里是假设三
+\end{enumerate}
+
+% ==================================================
+% @brief    符号说明
+% ==================================================
+
+\mcmSection{符号说明及名称定义}
+
+\begin{table}[H] %[h]表示在此处添加浮动体，默认为tbf，即页面顶部、底部和空白处添加
+		\captionsetup{skip=4pt} % 设置标题与表格的间距为4pt
+		\centering
+		\setlength{\arrayrulewidth}{2pt} % 设置表格线条宽度为1pt
+		\begin{tabular}{cc} %c表示居中，l表示左对齐，r表示右对齐，中间添加“|”表示竖线
+			\hline
+			\makebox[0.15\textwidth][c]{符号} & \makebox[0.6\textwidth][c]{说明}  \\ 
+			\hline
+			
+			$\text{变量名}$ & \text{变量含义}  \\
+			$\text{变量名}$ & \text{变量含义}  \\	
+			$\text{变量名}$ & \text{变量含义}  \\
+			
+			\hline
+		\end{tabular}
+		% \hline是横线，采用\makebox设置列宽
+	\end{table}
+
+
+
+
+
+================================================================================
+E:\LaTeX Now\src\C-Solution.tex 的内容:
+================================================================================
+\mcmSection{模型建立与求解}
+
+% =======================================
+% 问题一
+% =======================================
+
+\mcmSubsection{问题一}
+
+
+
+
+
+% =======================================
+% 问题二
+% =======================================
+
+\mcmSubsection{问题二}
+
+\mcmSubsubsection{收入与通货膨胀率之间的关系}
+\begin{equation}
+	Y_t = Y_{t-1} + \alpha \pi_t + \beta X_t + \epsilon_t 
+\end{equation}
+
+$( Y_t )$是在时间 ( t ) 的收入水平。
+$( Y_{t-1} )$ 是在时间 ( t-1 ) 的收入水平。
+$( \pi_t )$ 是时间 ( t ) 的通货膨胀率。
+$( \alpha )$ 是通货膨胀率对收入增长的影响系数。
+$( X_t )$ 是其他可能影响收入的控制变量。
+$( \beta )$ 是控制变量的系数。
+$( \epsilon_t )$ 是随机误差项。
+
+\mcmSubsubsection{货币供应量与通货膨胀率之间的关系}
+
+通过货币数量方程式MV=PY来建立模型，其中 ( M ) 代表货币供应量，( V ) 是货币流通速度，( P ) 是物价水平，( Y ) 是国内生产总值。假设货币流通速度和产出水平被认为是相对稳定的，因此货币供应量的变化主要通过影响物价水平来体现。
+
+\begin{equation}
+	[ \pi_t = \beta_0 + \beta_1 \Delta M_t + \epsilon_t ]
+\end{equation}
+
+$( \pi_t )$ 是时间 ( t ) 的通货膨胀率。
+$( \Delta M_t )$是时间 ( t ) 的货币供应量的变化率。
+$( \beta_0 )$是常数。
+$( \beta_1 )$ 是货币供应量变化率对通货膨胀率的影响系数。
+$( \epsilon_t )$ 是随机误差项。
+
+\mcmSubsubsection{利率与通货膨胀率之间的关系}
+
+名义利率等于实际利率加上通货膨胀率
+
+\begin{equation}
+	[ i_t = \alpha_0 + \alpha_1 \pi_t^e + \epsilon_t ]
+\end{equation}
+
+$(i_t )$是时间 ( t ) 的名义利率。
+$( \pi_t^e )$是时间 ( t ) 的通货膨胀预期率。
+$( \alpha_0 )$是模型的截距项。
+$( \alpha_1 )$是通货膨胀预期率对名义利率的影响系数。
+$( \epsilon_t )$是随机误差项。
+
+\mcmSubsubsection{综合模型：多元线性回归表达式}
+
+基于前述三个关系，我们可以构建一个综合的多元线性回归模型，以通货膨胀率 $\pi_t$ 为因变量：
+
+\begin{equation}
+\pi_t = \gamma_0 + \gamma_1 (Y_t - Y_{t-1}) + \gamma_2 X_t + \gamma_3 \Delta M_t + \gamma_4 i_t + \gamma_5 \pi_t^e + \epsilon_t
+\end{equation}
+
+其中，
+$\pi_t$ 是时间 $t$ 的通货膨胀率
+$Y_t - Y_{t-1}$ 是收入的变化
+$X_t$ 是其他影响收入的控制变量
+$\Delta M_t$ 是货币供应量的变化率
+$i_t$ 是名义利率
+$\pi_t^e$ 是通货膨胀预期率
+$\gamma_0, \gamma_1, \gamma_2, \gamma_3, \gamma_4, \gamma_5$ 是待估计的系数
+$\epsilon_t$ 是随机误差项。
+
+\begin{center}
+	\includegraphics[width=0.5\textwidth]{../res/2.png} % 调整图像的宽度
+\end{center}
+
+% =======================================
+% 问题三
+% =======================================
+
+\mcmSubsection{问题三}
+
+\mcmSubsubsection{LM曲线}
+
+流动性偏好-货币供应曲线描述了货币市场的均衡，可以表示为：
+
+\begin{equation}
+	\frac{M}{P} = L(r, Y)
+\end{equation}
+
+其中，( M ) 是货币供应量，( P ) 是价格水平，( L ) 是货币需求函数，它依赖于利率和收入。
+
+通货膨胀率( $\pi$ )可以与货币供应量的增长率和收入增长率相关联，可以表示为：
+
+\begin{equation}
+	 \pi = \beta_0 + \beta_2 \frac{\Delta M}{M} + \beta_3 \frac{\Delta Y}{Y} 
+\end{equation}
+
+其中， ( $\beta_0$ ) 是常数项，$( \beta_2 )$，是通货膨胀率对货币供应量增长率，
+$( \beta_3 )$ 是收入增长率的敏感度。
+1
+\mcmSubsubsection{利率与通货膨胀预期和实际通货膨胀率的关系}
+
+\begin{equation}
+	r = r^n + \pi^e
+\end{equation}
+
+其中，$( r^n )$是名义利率，$( \pi^e )$ 是通货膨胀预期率。
+
+% =======================================
+% 问题四
+% =======================================
+
+\mcmSection{问题四}
+
+
+
+
+
+
+
+
+\mcmSection{模型的评价与改进}
+
+
+
+
+================================================================================
+E:\LaTeX Now\src\D-Material.tex 的内容:
+================================================================================
+% =======================================
+% 参考文献
+% =======================================
+
+%\bibliography{src/E-Reference}
+% 引用所有 E-Reference.bib 里面的全部参考文献，不论在论文中是否被引用
+%\nocite{*}
+
+% =======================================
+% 附件
+% =======================================
+
+\appendix
+
+% =======================================
+% 使用软件
+% =======================================
+
+\section{主要使用的软件}
+
+\begin{enumerate}
+    \item 文字编辑：\LaTeX + Git
+    \item 程序模拟：Anaconda + Python
+\end{enumerate}
+
+% =======================================
+% 程序代码
+% =======================================
+
+\section{程序代码}
+
+% =======================================
+% 数据预处理代码
+% =======================================
+
+\begin{lstlisting}[caption={数据预处理代码}]
+	import pandas as pd
+	import os
+	import chardet
+	from sklearn.impute import KNNImputer
+	from sklearn.preprocessing import MinMaxScaler
+	
+	def process_csv_files(directory):
+	# 创建一个列表来存储所有文件的结果
+	all_files = []
+	
+	# 遍历目录中的所有CSV文件
+	for filename in os.listdir(directory):
+	if filename.endswith('.csv'):
+	file_path = os.path.join(directory, filename)        
+	processed_results_1 = pd.read_csv(file_path, header=None, skiprows=4, encoding='utf-8',
+	quotechar='"', thousands=',', na_values=[''])
+	
+	# 获取索引为0和41的行
+	row_0 = processed_results_1.iloc[0].tolist()
+	row_41 = processed_results_1.iloc[41].tolist() if len(processed_results_1) > 41 else None
+	
+	# 将结果添加到列表中
+	all_files.append(row_0)
+	if row_41:
+	all_files.append(row_41)
+	
+	# 将结果写入处理后的CSV文件
+	pd.DataFrame(all_files).to_csv(r'..\res\data\processed_results_1.csv', index=False, header=False)
+	
+	# 检测文件编码
+	with open(r'..\res\data\processed_results_1.csv', 'rb') as f:
+	result = chardet.detect(f.read())
+	
+	# 使用Pandas读取处理后的CSV文件
+	processed_results_1 = pd.read_csv(r'..\res\data\processed_results_1.csv', encoding=result['encoding'])
+	
+	# 提取数据行
+	processed_results_2 = processed_results_1.iloc[0::2]
+	
+	# 将数据行写入新的CSV文件
+	processed_results_2.to_csv(r'..\res\data\processed_results_2.csv', index=False, header=False)
+	
+	# 读取processed_results_2.csv文件
+	data_df = pd.read_csv(r'..\res\data\processed_results_2.csv', header=None)
+	
+	# 提取数据对应的变量名
+	name = data_df.iloc[:, 2]
+	
+	# 提取数据
+	data = data_df.iloc[:, 38:-1].values
+	# 将提取的数据保存到CSV文件
+	pd.DataFrame(data).to_csv(r'..\res\data\data.csv', index=False, header=False)
+	
+	# 使用KNN填充缺失值
+	imputer = KNNImputer(n_neighbors=5)  # 可以调整n_neighbors的值
+	data_imputed = imputer.fit_transform(data)
+	
+	# 将使用KNN填充缺失值后的数据保存到CSV文件
+	pd.DataFrame(data_imputed).to_csv(r'..\res\data\data_imputed.csv', index=False, header=False)
+	
+	# 创建MinMaxScaler实例
+	scaler = MinMaxScaler()
+	
+	# 对每一行进行归一化
+	data_normalized = scaler.fit_transform(data_imputed.T).T  # Transpose to normalize rows, then transpose back
+	
+	# 将归一化后的数据保存到CSV文件
+	pd.DataFrame(data_normalized).to_csv(r'..\res\data\data_normalized.csv', index=False, header=False)
+	
+	return name, data, data_imputed, data_normalized
+	
+	# 设置目录路径
+	directory = r'..\res\csv'
+	
+	# 处理CSV文件并获取数据
+	name, data, data_imputed, data_normalized = process_csv_files(directory)
+
+\end{lstlisting}
+
+% =======================================
+% 问题一处理代码
+% =======================================
+
+\begin{lstlisting}[caption={问题一处理代码}]
+	
+import pandas as pd
+import matplotlib.pyplot as plt
+
+# 设置绘图风格
+plt.style.use('ggplot')
+plt.rcParams['font.family'] = 'simhei'
+plt.rcParams['axes.unicode_minus'] = False
+
+# 加载 CSV 文件
+file_path = r'../res/data/data_imputed.csv'
+data = pd.read_csv(file_path, header=None)
+
+# 指定需要绘制的指标的索引和对应的标签
+indices = [6, 2, 4, 8]
+labels = ["货币供给量", "收入", "利率", "通货膨胀率"]
+
+# 获取指定索引的数据
+data_to_plot = data.iloc[indices]
+
+# 转置数据以便于绘图和统计计算
+data_transposed = data_to_plot.T
+
+# 确保年份的生成与数据的行数一致
+years = range(2024 - len(data_transposed.index), 2024)
+
+# 1. 绘制条形图
+axes_bar = data_transposed.plot(kind='bar', subplots=True, layout=(2, 2), figsize=(12*1.2, 9*1.2), legend=False)
+
+# 设置 x 轴刻度标签
+for ax in axes_bar.flatten():
+ax.set_xticks(range(len(data_transposed.index)))    # 设置刻度位置
+ax.set_xticklabels(years)                           # 设置刻度标签为年份
+ax.tick_params(axis='x', rotation=45)               # 旋转刻度标签
+ax.xaxis.set_tick_params(labelbottom=True)          # 确保显示 x 轴标签
+
+# 为每个子图设置标题
+for ax, label in zip(axes_bar.flatten(), labels):
+ax.set_title(label)
+
+plt.tight_layout()
+plt.subplots_adjust(hspace=0.15)                        # 调整上下间距
+plt.savefig('../res/png/1_bar_plot.png', dpi=300)
+plt.show()
+
+# 2. 箱线图
+fig, axes = plt.subplots(2, 2, figsize=(12*1.2, 9*1.2))
+
+for i, (ax, label) in enumerate(zip(axes.flatten(), labels)):
+ax.boxplot(data.iloc[indices[i]].values)
+ax.set_title(label)
+ax.set_xticks([1])
+ax.set_xticklabels([label])                         # 设置箱线图的 x 轴标签为指标名称
+
+plt.tight_layout()
+plt.subplots_adjust(hspace=0.15)                        # 调整上下间距
+plt.savefig('../res/png/2_box_plot.png', dpi=300)
+plt.show()
+
+# 3. 面积图
+axes_area = data_transposed.plot(kind='area', subplots=True, layout=(2, 2), stacked=False, figsize=(12*1.2, 9*1.2), legend=False)
+
+for ax in axes_area.flatten():
+ax.set_xticks(range(len(data_transposed.index)))    # 设置刻度位置
+ax.set_xticklabels(years)                           # 设置刻度标签为年份
+ax.tick_params(axis='x', rotation=45)               # 旋转刻度标签
+ax.axhline(0, color='black', linewidth=0.8)         # 添加水平线
+ax.xaxis.set_tick_params(labelbottom=True)          # 确保显示 x 轴标签
+
+# 为每个子图设置标题
+for ax, label in zip(axes_area.flatten(), labels):
+ax.set_title(label)
+
+plt.tight_layout()
+plt.subplots_adjust(hspace=0.15)                        # 调整上下间距
+plt.savefig('../res/png/3_area_plot.png', dpi=300)
+plt.show()
+
+# 统计量计算
+statistics = data_transposed.describe()                 # 获取描述性统计
+
+# 计算偏度和峰度
+skewness = data_transposed.skew()                      # 计算偏度
+kurtosis = data_transposed.kurtosis()                  # 计算峰度
+
+# 将偏度和峰度添加到统计量中
+statistics.loc['skewness'] = skewness
+statistics.loc['kurtosis'] = kurtosis
+
+# 打印统计量
+print(statistics)
+
+# 相关性分析
+correlation_pearson = data_transposed.corr(method='pearson')   # 皮尔逊相关系数
+correlation_spearman = data_transposed.corr(method='spearman') # 斯皮尔曼等级相关系数
+
+# 打印相关性矩阵
+print("Pearson Correlation Coefficients:")
+print(correlation_pearson)
+print("\nSpearman Correlation Coefficients:")
+print(correlation_spearman)
+	
+\end{lstlisting}
+
+% =======================================
+% 问题二处理代码
+% =======================================
+
+\begin{lstlisting}[caption={问题二处理代码}]
+	
+	import pandas as pd
+	import matplotlib.pyplot as plt
+	from sklearn.ensemble import VotingRegressor
+	from sklearn.linear_model import LinearRegression
+	from sklearn.tree import DecisionTreeRegressor
+	from sklearn.ensemble import RandomForestRegressor, GradientBoostingRegressor
+	from sklearn.svm import SVR
+	from sklearn.metrics import mean_squared_error, r2_score
+	
+	# 设置绘图风格
+	plt.style.use('ggplot')
+	plt.rcParams['font.family'] = 'simhei'
+	plt.rcParams['axes.unicode_minus'] = False
+	
+	# 加载归一化的 CSV 文件
+	file_path = r'../res/data/data_normalized.csv'
+	data_normalized = pd.read_csv(file_path, header=None)
+	
+	# 指定需要绘制的指标的索引和对应的标签
+	indices = [6, 3, 4, 8]  # 货币供给量、GNI、通货膨胀率、利率
+	labels = ["货币供给量", "GNI", "通货膨胀率", "利率"]
+	
+	# 获取指定索引的数据
+	data = data_normalized.iloc[indices].T  # 转置以便于后续处理
+	data.columns = labels
+	
+	# 集成学习模型函数
+	def fit_voting_model(X, y, y_label):
+	# 定义多个基学习器
+	model1 = LinearRegression()
+	model2 = DecisionTreeRegressor(random_state=42)
+	model3 = RandomForestRegressor(n_estimators=100, random_state=42)
+	model4 = GradientBoostingRegressor(n_estimators=100, random_state=42)
+	model5 = SVR()
+	
+	# 创建投票回归模型
+	voting_model = VotingRegressor(estimators=[
+	('lr', model1),
+	('dt', model2),
+	('rf', model3),
+	('gb', model4),
+	('svr', model5)
+	])
+	
+	# 训练模型
+	voting_model.fit(X, y)
+	y_pred = voting_model.predict(X)
+	
+	# 输出模型评估
+	print(f"\n集成学习模型结果 ({y_label}):")
+	print(f"均方误差: {mean_squared_error(y, y_pred)}")
+	print(f"R²: {r2_score(y, y_pred)}")
+	return y_pred
+	
+	# 分别对货币供给量、GNI、利率与通货膨胀建立模型预测
+	# 模型1: 货币供给量与通货膨胀率
+	X_supply = data[['GNI', '利率']]
+	y_supply = data['货币供给量']
+	y_pred_supply = fit_voting_model(X_supply, y_supply, "货币供给量")
+	
+	# 模型2: GNI与通货膨胀率
+	X_income = data[['货币供给量', '利率']]
+	y_income = data['GNI']
+	y_pred_income = fit_voting_model(X_income, y_income, "GNI")
+	
+	# 模型3: 利率与通货膨胀率
+	X_interest = data[['货币供给量', 'GNI']]
+	y_interest = data['利率']
+	y_pred_interest = fit_voting_model(X_interest, y_interest, "利率")
+	
+	# 模型4: 通货膨胀率与其他变量
+	X_inflation = data[['货币供给量', 'GNI', '利率']]
+	y_inflation = data['通货膨胀率']
+	y_pred_inflation = fit_voting_model(X_inflation, y_inflation, "通货膨胀率")
+	
+	# 反归一化步骤
+	# 读取原始数据以获取最小值和最大值
+	original_data_path = r'../res/data/data_imputed.csv'
+	original_data = pd.read_csv(original_data_path, header=None)
+	
+	# 反归一化函数
+	def denormalize(y_pred_normalized, row_index, label):
+	min_value = original_data.iloc[row_index].min()
+	max_value = original_data.iloc[row_index].max()
+	y_pred_original = min_value + (y_pred_normalized * (max_value - min_value))
+	print(f"\n反归一化后的预测 {label}:")
+	print(y_pred_original)
+	return y_pred_original
+	
+	# 分别反归一化预测结果
+	y_pred_supply_original = denormalize(y_pred_supply, 6, "货币供给量")
+	y_pred_income_original = denormalize(y_pred_income, 3, "GNI")
+	y_pred_interest_original = denormalize(y_pred_interest, 8, "利率")
+	y_pred_inflation_original = denormalize(y_pred_inflation, 4, "通货膨胀率")
+	
+	# 绘制预测结果图
+	fig, axes = plt.subplots(2, 2, figsize=(12, 10))
+	
+	# 货币供给量预测图
+	axes[0, 0].plot(y_pred_supply_original, label='预测货币供给量', color='blue')
+	axes[0, 0].set_title('货币供给量预测通货膨胀率')
+	axes[0, 0].legend()
+	
+	# GNI预测图
+	axes[0, 1].plot(y_pred_income_original, label='预测GNI', color='orange')
+	axes[0, 1].set_title('GNI预测通货膨胀率')
+	axes[0, 1].legend()
+	
+	# 利率预测图
+	axes[1, 0].plot(y_pred_interest_original, label='预测利率', color='green')
+	axes[1, 0].set_title('利率预测通货膨胀率')
+	axes[1, 0].legend()
+	
+	# 通货膨胀率预测图
+	axes[1, 1].plot(y_pred_inflation_original, label='预测通货膨胀率', color='red')
+	axes[1, 1].set_title('通货膨胀率预测')
+	axes[1, 1].legend()
+	
+	plt.tight_layout()
+	plt.show()
+	
+	plt.tight_layout()
+	plt.show()
+	
+	# data_normalized 或 data_imputed 中每一行数据含义(没有标签)
+	# 0 '消费者价格指数（2010 年 = 100）'
+	# 1 'GDP 增长率（年百分比）'
+	# 2 'GDP（不变价本币单位）'
+	# 3 'GNI（不变价本币单位）'
+	# 4 '按消费者价格指数衡量的通货膨胀（年通胀率）'
+	# 5 '广义货币增长（年度百分比）'
+	# 6 '广义货币（现价本币单位）'
+	# 7 '存款利率 (百分比)'
+	# 8 '实际利率 （%）'
+	# 9 '总失业人数（占劳动力总数的比例）（模拟劳工组织估计）'
+	# 10 '贷款利率 (百分比)'
+	
+\end{lstlisting}
+
+% =======================================
+% 问题三处理代码
+% =======================================
+
+\begin{lstlisting}[caption={问题三处理代码}]
+	
+	import pandas as pd
+	import matplotlib.pyplot as plt
+	from statsmodels.tsa.stattools import adfuller, coint
+	from statsmodels.tsa.api import VAR
+	
+	# 设置绘图风格
+	plt.style.use('ggplot')
+	plt.rcParams['font.family'] = 'simhei'
+	plt.rcParams['axes.unicode_minus'] = False
+	
+	# 加载归一化的 CSV 文件
+	file_path = r'../res/data/data_normalized.csv'
+	data_normalized = pd.read_csv(file_path, header=None)
+	
+	# 指定需要分析的指标的索引
+	indices = [6, 3, 4, 8]  # 广义货币（现价本币单位）、GNI（不变价本币单位）、按消费者价格指数衡量的通货膨胀（年通胀率）、实际利率 （%）
+	labels = ["货币供给量", "GNI", "通货膨胀率", "利率"]
+	
+	# 获取指定索引的数据
+	data = data_normalized.iloc[indices].T  # 转置以便于后续处理
+	data.columns = labels  # 重命名列名
+	
+	# 打印数据以检查
+	print("数据的形状:", data.shape)
+	print(data.head())  # 打印前几行数据
+	
+	# 检查数据的平稳性
+	def adf_test(series):
+	result = adfuller(series)
+	print(f'ADF Statistic: {result[0]}')
+	print(f'p-value: {result[1]}')
+	print('Critical Values:')
+	for key, value in result[4].items():
+	print(f'   {key}: {value}')
+	print('---')
+	
+	# 对每个变量进行ADF检验
+	for label in labels:
+	print(f'检验 {label} 的平稳性:')
+	adf_test(data[label])
+	
+	# 协整检验
+	def cointegration_test(series1, series2):
+	score, p_value, _ = coint(series1, series2)
+	print('协整检验结果:')
+	print(f'Cointegration Score: {score}, p-value: {p_value}')
+	
+	# 检查所有变量之间的协整关系
+	for i in range(len(labels)):
+	for j in range(i + 1, len(labels)):
+	print(f'正在检验协整关系: {labels[i]} 和 {labels[j]}')
+	cointegration_test(data[labels[i]], data[labels[j]])
+	
+	# 构建VAR模型
+	model = VAR(data)
+	results = model.fit(maxlags=5)
+	print(results.summary())
+	
+	# Granger因果关系检验
+	def granger_causality_test(data):
+	for i in range(len(labels)):
+	for j in range(len(labels)):
+	if i != j:
+	test_result = results.test_causality(labels[i], labels[j], kind='f')
+	print(f'Granger因果关系检验: {labels[i]} -> {labels[j]}')
+	print(test_result.summary())
+	print('---')
+	
+	# 进行Granger因果关系检验
+	granger_causality_test(data)
+	
+	# 绘制时间序列图
+	data.plot(figsize=(12, 8))
+	plt.title('货币供给量、GNI、通货膨胀率与利率的时间序列图')
+	plt.xlabel('年份')
+	plt.ylabel('值')
+	plt.legend(labels)
+	plt.show()
+	
+\end{lstlisting}
+
+% =======================================
+% 问题四处理代码
+% =======================================
+
+\begin{lstlisting}[caption={问题四处理代码}]
+	
+	import pandas as pd
+	import numpy as np
+	import matplotlib.pyplot as plt
+	from statsmodels.tsa.stattools import adfuller
+	from statsmodels.graphics.tsaplots import plot_acf, plot_pacf
+	from sklearn.impute import KNNImputer
+	from statsmodels.tsa.api import VAR
+	
+	# 设置绘图风格
+	plt.style.use('ggplot')
+	plt.rcParams['font.family'] = 'simhei'
+	plt.rcParams['axes.unicode_minus'] = False
+	
+	# 加载归一化的 CSV 文件
+	file_path = r'../res/data/data_normalized.csv'
+	data_normalized = pd.read_csv(file_path, header=None)
+	
+	# 指定需要分析的指标的索引
+	indices = [6, 3, 4, 8]  # 广义货币、GNI、通货膨胀率、实际利率
+	labels = ["货币供给量", "GNI", "通货膨胀率", "利率"]
+	
+	# 获取指定索引的数据并转置
+	data = data_normalized.iloc[indices].T  
+	data.columns = labels  # 重命名列名
+	
+	# 打印数据以检查
+	print("数据的形状:", data.shape)
+	print(data.head())  # 打印前几行数据
+	
+	# 检查数据中的缺失值和无穷值
+	def check_for_infs_and_nans(data):
+	if data.isna().any().any():
+	print("数据中存在缺失值.")
+	if np.isinf(data.values).any():
+	print("数据中存在无穷值.")
+	
+	# 处理无穷值和NaN值
+	def handle_inf_and_nan(data):
+	data = data.replace([np.inf, -np.inf], np.nan)
+	data = data.ffill().bfill()  # 使用 ffill() 和 bfill() 替代 fillna(method='ffill') 和 fillna(method='bfill')
+	return data
+	
+	# 对数变换
+	def log_transform(series):
+	return np.log(series + 1)  # 加1以避免对数为负无穷
+	
+	# 应用对数变换
+	for label in labels:
+	data[label] = log_transform(data[label])
+	
+	# 检查数据的平稳性
+	def adf_test(series):
+	result = adfuller(series.dropna())
+	print(f'ADF Statistic: {result[0]}')
+	print(f'p-value: {result[1]}')
+	print('Critical Values:')
+	for key, value in result[4].items():
+	print(f'   {key}: {value}')
+	print('---')
+	
+	# 对每个变量进行ADF检验
+	for label in labels:
+	print(f'检验 {label} 的平稳性:')
+	adf_test(data[label])
+	
+	# 对不平稳数据进行差分处理
+	def difference(series):
+	return series.diff().dropna()
+	
+	# 检查是否需要多阶差分
+	def check_and_difference(data):
+	differenced_data = pd.DataFrame(index=data.index)
+	for label in labels:
+	print(f'检验 {label} 的平稳性（差分前）:')
+	adf_test(data[label])
+	
+	diff_count = 0
+	while adfuller(data[label].dropna())[1] > 0.05:  # 如果p-value > 0.05，则数据不平稳
+	print(f'{label} 不平稳，进行差分处理')
+	data[label] = difference(data[label])
+	diff_count += 1
+	if diff_count > 5:  # 限制最多进行五阶差分
+	print(f'{label} 需要多阶差分处理，超出最大差分次数')
+	break
+	
+	differenced_data[label] = data[label]
+	print(f'{label} 平稳性差分处理后:')
+	adf_test(differenced_data[label])
+	
+	return differenced_data
+	
+	# 处理无穷值和NaN值
+	data = handle_inf_and_nan(data)
+	
+	differenced_data = check_and_difference(data)
+	
+	# 处理缺失值（前向填补）
+	differenced_data = differenced_data.ffill()
+	
+	# 再次检查缺失值
+	check_for_infs_and_nans(differenced_data)
+	
+	# 如果仍有缺失值，使用KNN插补
+	if differenced_data.isna().any().any():
+	print("数据中仍有缺失值，使用KNN插补")
+	imputer = KNNImputer(n_neighbors=5)
+	differenced_data_np = differenced_data.to_numpy()  # 转换为numpy数组以便KNN插补
+	differenced_data_np = imputer.fit_transform(differenced_data_np)
+	differenced_data = pd.DataFrame(differenced_data_np, columns=differenced_data.columns, index=differenced_data.index)
+	
+	# 再次检查数据
+	check_for_infs_and_nans(differenced_data)
+	
+	# 确认处理后的数据
+	print("处理后的数据形状:", differenced_data.shape)
+	print(differenced_data.head())
+	
+	# 绘制 ACF 和 PACF 图
+	def plot_acf_pacf(data, labels):
+	fig, axes = plt.subplots(len(labels), 2, figsize=(14, 3 * len(labels)))
+	max_lag = min(len(data) // 2 - 1, 20)  # 选择滞后期数
+	for i, label in enumerate(labels):
+	# ACF 图
+	plot_acf(data[label].dropna(), ax=axes[i, 0], lags=max_lag, title=f'ACF of {label}')
+	# PACF 图
+	plot_pacf(data[label].dropna(), ax=axes[i, 1], lags=max_lag, title=f'PACF of {label}')
+	plt.tight_layout()
+	plt.show()
+	
+	plot_acf_pacf(differenced_data, labels)
+	
+	# 使用 VAR 模型进行多维时间序列建模
+	def fit_var_model(data):
+	model = VAR(data)
+	# 计算合适的maxlags
+	n_obs = len(data)
+	n_vars = len(data.columns)
+	max_lags = min(int(np.floor((n_obs - 2) / (2 * n_vars))), 15)
+	print(f"使用的最大滞后阶数: {max_lags}")
+	model_fitted = model.fit(maxlags=max_lags, ic='aic')
+	return model_fitted
+	
+	# 训练VAR模型
+	var_model = fit_var_model(differenced_data)
+	
+	# 预测未来走势
+	def forecast_var_model(model, data, steps=5):
+	print("预测数据的形状:", data.shape)
+	print("检查数据中的缺失值和无穷值:")
+	check_for_infs_and_nans(data)
+	
+	forecast = model.forecast(data.values[-model.k_ar:], steps=steps)
+	
+	# 生成预测的日期索引
+	last_date = data.index[-1]
+	if isinstance(last_date, pd.Timestamp):
+	forecast_index = pd.date_range(start=last_date + pd.Timedelta(days=1), periods=steps)
+	else:
+	forecast_index = range(len(data), len(data) + steps)
+	
+	forecast_df = pd.DataFrame(forecast, index=forecast_index, columns=data.columns)
+	return forecast_df
+	
+	forecast_df = forecast_var_model(var_model, differenced_data, steps=5)
+	print('VAR模型未来 5 步预测:')
+	print(forecast_df)
+	
+\end{lstlisting}
+
+
+
+
+================================================================================
+E:\LaTeX Now\src\E-Reference.bib 的内容:
+================================================================================
+@phdthesis{cao,
+  type = {{硕士}},
+  title = {{基于乘客等待时间的城市轨道交通列车时刻表优化模型与算法研究}},
+  author = {曹, 璐},
+  year = {2021},
+  doi = {10.26944/d.cnki.gbfju.2021.001755},
+  langid = {chinese},
+  school = {北京交通大学},
+}
+
+@book{test,
+  author = {Test Author},
+  title = {Test Title},
+  year = {2023},
+  publisher = {Test Publisher}
+}
+
+
+
+
+
+================================================================================
+E:\LaTeX Now\src\F-Define.sty 的内容:
+================================================================================
+\ProvidesPackage{F-Define}
+
+\RequirePackage[]{geometry}    			 	% 页面边距设置
+%\RequirePackage[UTF8,heading=true]{ctex} 	% 如果使用 ctexart 文档类，不需要再单独加载 ctex 包
+\RequirePackage[]{graphicx}     			% 图形支持
+\RequirePackage[]{amsmath}      			% 数学公式支持
+\RequirePackage[]{amssymb}     			    % 数学符号支持
+\RequirePackage[]{amsthm}       			% 数学定理环境
+\RequirePackage{booktabs}       			% 表格美化
+\RequirePackage{float}          			% 浮动体控制
+\RequirePackage{subfig}        			 	% 子图支持
+\RequirePackage{listings}       			% 代码展示
+\RequirePackage{color}          			% 颜色支持
+\RequirePackage[table,xcdraw]{xcolor} 		% 扩展颜色支持
+\RequirePackage{natbib}        	 			% 参考文献bib包
+\RequirePackage{gbt7714}        	 		% 参考文献格式
+\RequirePackage{fancyhdr}       			% 页眉页脚设置
+\RequirePackage{url}           				% URL 支持
+\RequirePackage{enumitem}       			% 列表环境定制
+\RequirePackage{multirow}       			% 表格多行单元格
+\RequirePackage{caption}        			% 图表标题设置
+\RequirePackage{longtable}      			% 长表格支持
+\RequirePackage{algorithm}     			 	% 算法环境
+\RequirePackage{algorithmicx}   			% 算法描述
+\RequirePackage{algpseudocode}  			%伪代码包
+\RequirePackage{abstract}       			% 摘要格式设置
+\RequirePackage{pythonhighlight} 			% Python 代码高亮
+\RequirePackage{hyperref}       			% 超链接支持
+\RequirePackage{tikz}						% 支持绘图
+\usetikzlibrary{shapes, positioning}		% tikz子库
+
+% 图片路径设置
+\graphicspath{{figures/}}
+
+% 参考文献设置
+\bibliographystyle{gbt7714-numerical}
+
+% 页面设置
+\geometry{a4paper,left=2.7cm,right=2.7cm,top=2.54cm,bottom=2.54cm}
+
+% 定义页眉页脚格式——没有页眉，页脚中部放置页码。
+\pagestyle{plain}
+
+% 修改行间距
+\linespread{1.25}
+
+% 摘要格式设置
+\setlength{\abstitleskip}{0em}
+\setlength{\absleftindent}{0pt}
+\setlength{\absrightindent}{0pt}
+\setlength{\absparsep}{0em}
+\renewcommand{\abstractname}{\textbf{\zihao{4}{摘要}}}
+\renewcommand{\abstracttextfont}{\zihao{-4}}
+
+% 图表标题设置
+\captionsetup[figure]{labelsep=space}
+\captionsetup[table]{labelsep=space}
+\captionsetup[figure]{labelsep=space}     	%去除图标题的冒号
+\captionsetup[table]{labelsep=space}     	%去除表格标题的冒号
+
+% ==============================================
+% @brief    将阿拉伯数字转化为汉字
+% @detail   目前只能转换10以内的数字
+% ==============================================
+\newcommand{\mcmCNumber}[1]{%
+    \ifcase#1
+        零%
+    \or
+        一%
+    \or
+        二%
+    \or
+        三%
+    \or
+        四%
+    \or
+        五%
+    \or
+        六%
+    \or
+        七%
+    \or
+        八%
+    \or
+        九%
+    \or
+        十%
+    \else
+        UnKnown%
+    \fi
+}
+
+
+% ========================================
+% @brief    一级标题（汉字标号）
+% @detail   这是最高等级的章节命令
+% ========================================
+\newcommand{\mcmSection}[1]{
+    % 章节计数器自增一
+    \stepcounter{section}
+
+    % 将该section添加到标题添加到书签中
+    \addcontentsline{toc}{section}{\thesection　#1}
+
+    % 具体的标题
+    \begin{center}
+        \textbf{\fontsize{20}{1.5}{
+            \mcmCNumber{\value{section}}、#1
+        }}
+    \end{center}
+}
+
+
+
+% ========================================
+% @brief    二级标题（汉字标号）
+% ========================================
+\newcommand{\mcmSubsection}[1]{
+    \subsection{#1}
+}
+
+
+
+% ========================================
+% @brief    三级标题（汉字标号）
+% ========================================
+\newcommand{\mcmSubsubsection}[1]{
+    \subsubsection{#1}
+}
+
+
+
+% ========================================
+% @brief    算法描述的元环境
+% ========================================
+\newlist{mcmMetaArithmetic}{enumerate}{2}
+\setlist[mcmMetaArithmetic]{
+    label=(\arabic*),
+    before=\bfseries,
+    itemsep=10pt
+    }
+
+
+% ========================================
+% @brief    算法描述
+% ========================================
+\newenvironment{mcmArithmetic}{
+    算法清单
+    \begin{mcmMetaArithmetic}
+}{
+    \end{mcmMetaArithmetic}
+}
+
+
+% ======================================================
+% @brief    设置目录超链接
+% ======================================================
+\hypersetup{
+    colorlinks=true,        % 启用超链接的颜色显示
+    linkcolor=black,        % 将超链接的颜色设置为黑色
+    filecolor=black,        % 将文件链接的颜色设置为黑色
+    urlcolor=black,         % 将URL链接的颜色设置为黑色
+    pdftitle={Paper},       % 将PDF文件的标题设置为“Paper”
+    pdfpagemode=FullScreen, % 在打开PDF文件时，将其设置为全屏模式
+    bookmarksnumbered=true, % 书签自带章节编号
+}
+
+
+% ======================================================
+% @brief    定义“例题”环境
+% ======================================================
+
+% 例题计数器
+\newcounter{questionCounter}
+
+% 例题环境
+\newenvironment{question}
+    {
+        \kaishu
+        \refstepcounter{questionCounter}
+        {\heiti 例题} \thequestionCounter　
+    }
+    {}
+
+% 例题环境（不计数版本）
+\newenvironment{question*}
+    {
+        \kaishu
+        {\heiti 例题}
+    }
+    {}
+
+
+
+% ===================================================
+% @brief        “代码”环境
+% @attention    要想在代码环境中添加中文字体，请选择xelatex编译进行编译
+% ===================================================
+\lstset{
+    % 基本代码风格
+    basicstyle          =   \ttfamily,
+    % 关键字风格
+    keywordstyle        =   \bfseries,
+    % 注释的风格，斜体
+    commentstyle        =   \rmfamily\itshape,
+    % 字符串风格
+    stringstyle         =   \ttfamily,
+    % 别问为什么，加上这个
+    flexiblecolumns,
+    % 行号的位置在左边
+    numbers             =   left,
+    % 是否显示空格，显示了有点乱，所以不显示了
+    showspaces          =   false,
+    % 行号的样式，小五号，tt等宽字体
+    numberstyle         =   \zihao{-4}\ttfamily,
+    showstringspaces    =   false,
+    % 这段代码的名字所呈现的位置，t指的是top上面
+    captionpos          =   t,
+    % 显示边框
+    frame               =   lrtb,
+    % 自动换行
+    breaklines          =   true
+}
+
+
+
+% ======================================================
+% @brief    定理
+% ======================================================
+\newcounter{mcmTheoremCounter}
+\newenvironment{mcmTheorem}[1]{
+    % 为了和其他文本区分，定理内部用楷书显示
+    \kaishu
+
+    % 引用计数器加一，这里不使用stepcounter命令给计数器加一！！！
+    \refstepcounter{mcmTheoremCounter}
+
+    % 换行
+    \quad\newline
+
+    % 标题
+    {\heiti 定理 \themcmTheoremCounter \quad #1}
+}{}
+
+
+
+

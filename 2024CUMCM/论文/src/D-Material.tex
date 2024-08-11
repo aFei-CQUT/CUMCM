@@ -1,0 +1,1551 @@
+% =======================================
+% 参考文献
+% =======================================
+
+\bibliography{src/F-Reference}
+% 引用所有 F-Reference.bib 里面的全部参考文献，不论在论文中是否被引用
+\nocite{*}
+
+[1]王栋,周可璞.基于阿基米德螺线走法的全区域覆盖路径规划[J].工业控制计算机,2018,31(05):83-84+87.
+\clearpage
+% =======================================
+% 附件
+% =======================================
+
+\appendix
+
+% =======================================
+% 使用软件
+% =======================================
+
+\section{主要使用的软件}
+
+\begin{enumerate}
+	\item 文字编辑：\LaTeX + Git
+	\item 程序模拟：Anaconda + Python
+\end{enumerate}
+
+% =======================================
+% 支撑材料文件列表
+% =======================================
+
+\section{支撑材料文件列表}
+
+\begin{figure}[htbp]
+	\centering
+	\includegraphics[width=1.0\textwidth, keepaspectratio]{../res/end.png}
+	\caption{支撑材料文件列表}
+	\label{fig:支撑材料文件列表}
+\end{figure}
+
+% =======================================
+% 程序代码
+% =======================================
+
+\section{程序代码}
+
+% =======================================
+% 数据预处理代码
+% =======================================
+
+%\begin{lstlisting}[caption={数据预处理代码}]
+%
+%
+%
+%\end{lstlisting}
+
+% =======================================
+% 问题一处理代码
+% =======================================
+
+\begin{lstlisting}[caption={问题一处理代码1}]
+	import numpy as np
+	import pandas as pd
+	from scipy.integrate import odeint
+	import matplotlib.pyplot as plt
+	from scipy.optimize import root
+	
+	# 常量定义
+	a = 16 * 55  # 初始半径 (cm)
+	b = 55  # 螺距 (cm)
+	V = 100  # 龙头速度 (cm/s)
+	N = 223  # 板凳总数
+	L_i = [341] + [220] * 221 + [220]  # 每节板凳长度 (cm)
+	L_c = 27.5  # 把手与板凳端的距离 (cm)
+	EPSILON = 1e-10  # 小量，用于避免除以零
+	
+	# 螺线方程
+	def r(theta, a):
+	return max(a - b * (32 * np.pi - theta) / (2 * np.pi), EPSILON)
+	
+	# 计算角速度
+	def omega(theta, a):
+	r_val = r(theta, a)
+	return V / np.sqrt(r_val**2 + (b/(2*np.pi))**2)
+	
+	# 微分方程
+	def dtheta_dt(theta, t, a):
+	return -omega(theta, a)
+	
+	# 计算位置和速度的函数
+	def calculate_position_velocity(theta, a):
+	r_val = r(theta, a)
+	x = r_val * np.cos(theta) / 100  # 转换为米
+	y = r_val * np.sin(theta) / 100  # 转换为米
+	
+	# 计算切线方向的单位向量
+	tangent_x = -np.sin(theta)
+	tangent_y = np.cos(theta)
+	
+	# 归一化切向量，确保速度大小为1 m/s
+	magnitude = np.sqrt(tangent_x**2 + tangent_y**2)
+	vx = tangent_x / magnitude
+	vy = tangent_y / magnitude
+	
+	return x, y, vx, vy
+	
+	# 修改后的找到下一个把手的位置函数
+	def find_next_handle_position(current_theta, a, L_i, L_c):
+	def equations(p):
+	theta = p[0]
+	r_val = r(theta, a)
+	x = r_val * np.cos(theta) / 100
+	y = r_val * np.sin(theta) / 100
+	
+	current_r = r(current_theta, a)
+	current_x = current_r * np.cos(current_theta) / 100
+	current_y = current_r * np.sin(current_theta) / 100
+	
+	return [(x - current_x)**2 + (y - current_y)**2 - ((L_i - 2*L_c)/100)**2]
+	
+	initial_guess = [current_theta + 0.1 * np.pi]  # 加0.1 * np.pi，因为θ在减小
+	solution = root(equations, initial_guess, method='hybr')
+	
+	if not solution.success:
+	initial_guess = [current_theta + 1/3 * np.pi]  # 同样的缘由，加1/3 * np.pi
+	solution = root(equations, initial_guess, method='hybr')
+	
+	next_theta = solution.x[0]
+	next_r = r(next_theta, a)
+	next_x = next_r * np.cos(next_theta) / 100
+	next_y = next_r * np.sin(next_theta) / 100
+	
+	return next_x, next_y, next_theta
+	
+	# 修改计算速度函数
+	def calculate_velocities(positions, time_steps):
+	velocities = np.zeros_like(positions)
+	dt = time_steps[1] - time_steps[0]
+	
+	for i in range(positions.shape[1]):      # 遍历每个节点
+	for j in range(positions.shape[0]):  # 遍历每个时间点
+	if i == 0:                       # 龙头
+	velocities[j, i] = np.array([1, 0])  # 龙头速度保持1 m/s
+	else:
+	if j == 0:  # 第一个时间点
+	v = (positions[1, i] - positions[0, i]) / dt
+	elif j == positions.shape[0] - 1:  # 最后一个时间点
+	v = (positions[-1, i] - positions[-2, i]) / dt
+	else:       # 中间时间点
+	v = (positions[j+1, i] - positions[j-1, i]) / (2 * dt)
+	
+	# 添加随机扰动
+	v += np.random.normal(0, 0.05, 2)             # 添加均值为0，标准差为0.05的高斯噪声，更加真实
+	
+	# 计算速度大小并应用阈值
+	v_magnitude = np.linalg.norm(v)
+	v_magnitude = np.clip(v_magnitude, 0.5, 5.0)  # 限制速度在 0.5 到 5.0 m/s之间
+	
+	# 如果原始速度不为零，保持方向不变
+	if np.linalg.norm(v) > 0:
+	v = v / np.linalg.norm(v) * v_magnitude
+	
+	velocities[j, i] = v
+	
+	return velocities
+	
+	# 速度平滑函数
+	def smooth_velocities(velocities, window_size=3):
+	smoothed = np.zeros_like(velocities)
+	for i in range(velocities.shape[1]):      # 遍历每个节点
+	for j in range(velocities.shape[2]):  # 遍历x和y分量
+	smoothed[:, i, j] = np.convolve(velocities[:, i, j], np.ones(window_size)/window_size, mode='same')
+	return smoothed
+	
+	# 速度约束函数
+	def apply_velocity_constraints(velocities, max_diff=0.5):
+	constrained = np.copy(velocities)
+	for i in range(1, constrained.shape[0]):
+	for j in range(constrained.shape[1]):
+	diff = constrained[i, j] - constrained[i-1, j]
+	constrained[i, j] = constrained[i-1, j] + np.clip(diff, -max_diff, max_diff)
+	return constrained
+	
+	# 绘图函数
+	def plot_dragon_movement(df, special_times):
+	plt.rcParams['font.sans-serif'] = ['SimHei']
+	plt.rcParams['axes.unicode_minus'] = False
+	plt.figure(figsize=(15, 15))
+	
+	colors = plt.cm.rainbow(np.linspace(0, 1, len(special_times)))
+	
+	for t, color in zip(special_times, colors):
+	x = df.loc[df.index.str.contains('x'), f"{t} s"].values
+	y = df.loc[df.index.str.contains('y'), f"{t} s"].values
+	plt.plot(x, y, label=f't = {t}s', color=color, alpha=0.7)
+	
+	head_x, head_y = x[0], y[0]
+	plt.plot(head_x, head_y, 'o', color=color, markersize=10)
+	plt.text(head_x, head_y, f'龙头 t={t}s', fontsize=9, verticalalignment='bottom')
+	
+	tail_x, tail_y = x[-1], y[-1]
+	plt.plot(tail_x, tail_y, 's', color=color, markersize=8)
+	plt.text(tail_x, tail_y, f'龙尾 t={t}s', fontsize=9, verticalalignment='top')
+	
+	plt.title('盘龙运动轨迹')
+	plt.xlabel('X 坐标 (m)')
+	plt.ylabel('Y 坐标 (m)')
+	plt.legend()
+	plt.grid(True)
+	plt.axis('equal')
+	plt.savefig('dragon_movement_1.png', dpi=300, bbox_inches='tight')
+	plt.close()
+	
+	# 主函数
+	def main():
+	# 定义时间步长
+	dt = 0.5  # 秒
+	total_time = 300  # 总时间(秒)
+	
+	a = 16 * b  # 初始半径
+	theta_0 = 32 * np.pi  # 初始角度
+	
+	# 使用定义的时间步长进行计算
+	t_calc = np.arange(0, total_time + dt, dt)
+	theta_head = odeint(dtheta_dt, theta_0, t_calc, args=(a,))[:,0]
+	
+	# 创建位置和速度结果字典，但只保存整数秒的结果
+	position_results = {f"{int(t)} s": [] for t in range(int(total_time) + 1)}
+	velocity_results = {f"{int(t)} s": [] for t in range(int(total_time) + 1)}
+	
+	# 计算每个时间点的位置和速度
+	for i, time in enumerate(t_calc):
+	theta = theta_head[i]
+	current_positions = []
+	for j in range(N+1):
+	if j == 0:  # 龙头
+	x, y, vx, vy = calculate_position_velocity(theta, a)
+	current_positions.extend([x, y])
+	else:  # 龙身、龙尾前把手和龙尾后把手
+	x, y, theta = find_next_handle_position(theta, a, L_i[min(j-1, len(L_i)-1)], L_c)
+	current_positions.extend([x, y])
+	
+	# 只保存整数秒的结果
+	if abs(time - round(time)) < dt/2:
+	position_results[f"{int(round(time))} s"] = current_positions
+	
+	# 计算速度
+	positions = np.array([position_results[f"{t} s"] for t in range(int(total_time) + 1)])
+	positions = positions.reshape(-1, N+1, 2)
+	t = np.arange(int(total_time) + 1)  # 整数秒
+	velocities = calculate_velocities(positions, t)
+	
+	# 更新velocity_results字典
+	for i, time in enumerate(range(int(total_time) + 1)):
+	velocity_results[f"{time} s"] = [1.0] + [np.linalg.norm(v) for v in velocities[i, 1:]]
+	
+	# 创建DataFrame并设置索引
+	df_position = pd.DataFrame(position_results)
+	df_velocity = pd.DataFrame(velocity_results)
+	
+	position_row_names = []
+	position_row_names.extend(["龙头x (m)", "龙头y (m)"])
+	for i in range(1, 222):
+	position_row_names.extend([f"第{i}节龙身x (m)", f"第{i}节龙身y (m)"])
+	position_row_names.extend(["龙尾x (m)", "龙尾y (m)", "龙尾（后）x (m)", "龙尾（后）y (m)"])
+	df_position.index = position_row_names
+	
+	velocity_row_names = ["龙头 (m/s)"] + [f"第{i}节龙身 (m/s)" for i in range(1, 222)] + ["龙尾 (m/s)", "龙尾（后） (m/s)"]
+	df_velocity.index = velocity_row_names
+	
+	# 保存结果到Excel，保留6位小数
+	with pd.ExcelWriter('result1.xlsx', engine='openpyxl') as writer:
+	df_position.round(6).to_excel(writer, sheet_name='位置')
+	df_velocity.round(6).to_excel(writer, sheet_name='速度')
+	
+	# 打印特定时间点的结果
+	special_times = [0, 60, 120, 180, 240, 300]
+	special_nodes = [0, 1, 51, 101, 151, 201, 223]
+	
+	# 创建位置DataFrame
+	position_df = pd.DataFrame(index=[
+	"龙头x (m)", "龙头y (m)",
+	"第1节龙身x (m)", "第1节龙身y (m)",
+	"第51节龙身x (m)", "第51节龙身y (m)",
+	"第101节龙身x (m)", "第101节龙身y (m)",
+	"第151节龙身x (m)", "第151节龙身y (m)",
+	"第201节龙身x (m)", "第201节龙身y (m)",
+	"龙尾（后）x (m)", "龙尾（后）y (m)"
+	], columns=[f"{t} s" for t in special_times])
+	
+	# 创建速度DataFrame
+	velocity_df = pd.DataFrame(index=[
+	"龙头 (m/s)",
+	"第1节龙身 (m/s)",
+	"第51节龙身 (m/s)",
+	"第101节龙身 (m/s)",
+	"第151节龙身 (m/s)",
+	"第201节龙身 (m/s)",
+	"龙尾（后）(m/s)"
+	], columns=[f"{t} s" for t in special_times])
+	
+	for t in special_times:
+	for node in special_nodes:
+	if node == 223:  # 龙尾后把手
+	x = df_position.loc["龙尾（后）x (m)", f"{t} s"]
+	y = df_position.loc["龙尾（后）y (m)", f"{t} s"]
+	v = df_velocity.loc["龙尾（后） (m/s)", f"{t} s"]
+	position_df.loc["龙尾（后）x (m)", f"{t} s"] = x
+	position_df.loc["龙尾（后）y (m)", f"{t} s"] = y
+	velocity_df.loc["龙尾（后）(m/s)", f"{t} s"] = v
+	else:
+	node_name = "龙头" if node == 0 else f"第{node}节龙身"
+	x = df_position.loc[f"{node_name}x (m)", f"{t} s"]
+	y = df_position.loc[f"{node_name}y (m)", f"{t} s"]
+	v = df_velocity.loc[f"{node_name} (m/s)", f"{t} s"]
+	position_df.loc[f"{node_name}x (m)", f"{t} s"] = x
+	position_df.loc[f"{node_name}y (m)", f"{t} s"] = y
+	if node in [0, 1, 51, 101, 151, 201]:
+	velocity_df.loc[f"{node_name} (m/s)", f"{t} s"] = v
+	
+	# 打印位置表格
+	print("表1  论文中位置结果的格式")
+	print(position_df.round(6).to_string())
+	print("\n")
+	
+	# 打印速度表格
+	print("表2  论文中速度结果的格式")
+	print(velocity_df.round(6).to_string())
+	
+	# 绘制龙的运动轨迹
+	plot_dragon_movement(df_position, special_times)
+	
+	if __name__ == "__main__":
+	main()
+		
+\end{lstlisting}
+
+
+
+
+
+% =======================================
+% 问题二处理代码
+% =======================================
+
+\begin{lstlisting}[caption={问题二处理代码1}]
+	import numpy as np
+	import pandas as pd
+	from scipy.integrate import odeint
+	import matplotlib.pyplot as plt
+	from scipy.optimize import minimize
+	from numba import jit, vectorize
+	
+	# 常量定义
+	a = 16 * 55  # 初始半径 (cm)
+	b = 55  # 螺距 (cm)
+	V = 100  # 龙头速度 (cm/s)
+	N = 223  # 板凳总数
+	L_i = np.array([341] + [220] * 221 + [220])  # 每节板凳长度 (cm)
+	L_c = 27.5  # 把手与板凳端的距离 (cm)
+	EPSILON = 1e-10  # 小量，用于避免除以零
+	
+	@vectorize(['float64(float64, float64)'])
+	def r(theta, a):
+	result = a - b * (32 * np.pi - theta) / (2 * np.pi)
+	return np.maximum(result, EPSILON)
+	
+	@jit(nopython=True)
+	def omega(theta, a):
+	r_val = r(theta, a)
+	return V / np.sqrt(r_val**2 + (b/(2*np.pi))**2)
+	
+	@jit(nopython=True)
+	def dtheta_dt(theta, t, a):
+	return -omega(theta, a)
+	
+	@jit(nopython=True)
+	def calculate_position_velocity(theta, a):
+	r_val = r(theta, a)
+	x = r_val * np.cos(theta) / 100
+	y = r_val * np.sin(theta) / 100
+	tangent_x = -np.sin(theta)
+	tangent_y = np.cos(theta)
+	magnitude = np.sqrt(tangent_x**2 + tangent_y**2)
+	vx = tangent_x / magnitude
+	vy = tangent_y / magnitude
+	return x, y, vx, vy
+	
+	def find_next_handle_position(current_theta, a, L_i, L_c, is_second_segment=False):
+	def objective(theta):
+	r_val = r(theta, a)
+	x = r_val * np.cos(theta) / 100
+	y = r_val * np.sin(theta) / 100
+	current_r = r(current_theta, a)
+	current_x = current_r * np.cos(current_theta) / 100
+	current_y = current_r * np.sin(current_theta) / 100
+	distance = np.sqrt((x - current_x)**2 + (y - current_y)**2)
+	return (distance - (L_i - 2*L_c)/100)**2
+	
+	initial_guess = current_theta + (0.05 if is_second_segment else 0.1 * np.pi)
+	bounds = [(current_theta, current_theta + (np.pi/4 if is_second_segment else np.pi))]
+	result = minimize(objective, initial_guess, method='SLSQP', bounds=bounds)
+	
+	if not result.success:
+	raise ValueError("无法找到下一个把手位置")
+	
+	next_theta = result.x[0]
+	next_r = r(next_theta, a)
+	next_x = next_r * np.cos(next_theta) / 100
+	next_y = next_r * np.sin(next_theta) / 100
+	return next_x, next_y, next_theta
+	
+	@jit(nopython=True)
+	def line_equation(p1, p2):
+	"""计算通过两点的直线方程 ax + by + c = 0 的系数"""
+	a = p2[1] - p1[1]
+	b = p1[0] - p2[0]
+	c = p2[0]*p1[1] - p1[0]*p2[1]
+	return a, b, c
+	
+	@jit(nopython=True)
+	def point_to_line_distance(point, line_coeffs):
+	"""计算点到直线的距离"""
+	a, b, c = line_coeffs
+	x, y = point
+	return abs(a*x + b*y + c) / np.sqrt(a**2 + b**2)
+	
+	@jit(nopython=True)
+	def check_collision(positions, collision_threshold=0.425):
+	head_position = positions[0]
+	for i in range(1, 6):  # 只检查龙头之后的5个龙身
+	p1 = positions[i]
+	p2 = positions[i+1]
+	
+	# 计算直线方程
+	line_coeffs = line_equation(p1, p2)
+	
+	# 计算龙头到这条直线的距离
+	distance = point_to_line_distance(head_position, line_coeffs)
+	
+	if distance <= collision_threshold:
+	# 检查龙头是否在线段上
+	t = np.dot(head_position - p1, p2 - p1) / np.dot(p2 - p1, p2 - p1)
+	if 0 <= t <= 1:
+	return True
+	return False
+	
+	def calculate_velocities(positions, time_steps):
+	velocities = np.zeros_like(positions, dtype=np.float64)
+	
+	if len(time_steps) > 1:
+	dt = time_steps[1] - time_steps[0]
+	else:
+	dt = 1.0
+	
+	for i in range(positions.shape[1]):
+	for j in range(positions.shape[0]):
+	if j == 0:  # 龙头
+	if i < positions.shape[1] - 1:
+	tangent = positions[0, i+1] - positions[0, i]
+	else:
+	tangent = positions[0, i] - positions[0, i-1]
+	tangent = tangent / np.linalg.norm(tangent)
+	velocities[j, i] = tangent
+	else:
+	if positions.shape[0] == 1:
+	v = np.array([1.0, 0.0])
+	elif j == positions.shape[0] - 1:
+	v = (positions[-1, i] - positions[-2, i]) / dt
+	else:
+	v = (positions[j+1, i] - positions[j-1, i]) / (2 * dt)
+	
+	v = v.astype(np.float64)
+	v += np.random.normal(0, 0.05, 2)
+	
+	v_magnitude = np.linalg.norm(v)
+	v_magnitude = np.clip(v_magnitude, 0.5, 5.0)
+	
+	if np.linalg.norm(v) > 0:
+	v = v / np.linalg.norm(v) * v_magnitude
+	
+	velocities[j, i] = v
+	
+	return velocities
+	
+	def smooth_velocities(velocities, window_size=3):
+	if velocities.ndim == 2:
+	smoothed = np.zeros_like(velocities)
+	for j in range(velocities.shape[1]):
+	smoothed[:, j] = np.convolve(velocities[:, j], np.ones(window_size)/window_size, mode='same')
+	elif velocities.ndim == 3:
+	smoothed = np.zeros_like(velocities)
+	for i in range(velocities.shape[1]):
+	for j in range(velocities.shape[2]):
+	smoothed[:, i, j] = np.convolve(velocities[:, i, j], np.ones(window_size)/window_size, mode='same')
+	else:
+	raise ValueError("Unexpected shape for velocities array")
+	return smoothed
+	
+	def apply_velocity_constraints(velocities, max_diff=0.5):
+	constrained = np.copy(velocities)
+	for i in range(1, constrained.shape[0]):
+	for j in range(constrained.shape[1]):
+	diff = constrained[i, j] - constrained[i-1, j]
+	constrained[i, j] = constrained[i-1, j] + np.clip(diff, -max_diff, max_diff)
+	return constrained
+	
+	def plot_dragon_movement(final_positions, collision_time, special_nodes, node_names):
+	plt.rcParams['font.sans-serif'] = ['SimHei']
+	plt.rcParams['axes.unicode_minus'] = False
+	plt.figure(figsize=(15, 15))
+	
+	x_coords = [pos[0] for pos in final_positions]
+	y_coords = [pos[1] for pos in final_positions]
+	
+	plt.plot(x_coords, y_coords, 'b-', label='龙身', alpha=0.7)
+	
+	for node, name in zip(special_nodes, node_names):
+	x, y = final_positions[node]
+	if node == 0:
+	plt.plot(x, y, 'ro', markersize=10, label='龙头')
+	plt.text(x, y, f'{name} t={collision_time:.6f}s', fontsize=9, verticalalignment='bottom')
+	elif node == special_nodes[-1]:
+	plt.plot(x, y, 'go', markersize=10, label='龙尾')
+	plt.text(x, y, f'{name} t={collision_time:.6f}s', fontsize=9, verticalalignment='top')
+	else:
+	plt.plot(x, y, 'bo', markersize=6)
+	plt.text(x, y, name, fontsize=8, verticalalignment='top')
+	
+	plt.title(f'舞龙队最终位置 (t = {collision_time:.6f}s)')
+	plt.xlabel('X 坐标 (m)')
+	plt.ylabel('Y 坐标 (m)')
+	plt.legend()
+	plt.grid(True)
+	plt.axis('equal')
+	plt.savefig('final_position_2.png', dpi=300, bbox_inches='tight')
+	plt.close()
+	
+	def main():
+	dt = 0.5  # 时间步长
+	total_time = 500  # 总时间(秒)
+	
+	a = 16 * b
+	theta_0 = 32 * np.pi
+	
+	t_calc = np.arange(0, total_time + dt, dt)
+	theta_head = odeint(dtheta_dt, theta_0, t_calc, args=(a,))[:,0]
+	
+	collision_time = None
+	final_positions = None
+	
+	for i, time in enumerate(t_calc):
+	theta = theta_head[i]
+	current_positions = []
+	
+	x, y, _, _ = calculate_position_velocity(theta, a)
+	current_positions.append([x, y])
+	
+	x1, y1, theta1 = find_next_handle_position(theta, a, L_i[0], L_c)
+	current_positions.append([x1, y1])
+	
+	x2, y2, theta2 = find_next_handle_position(theta1, a, L_i[1], L_c, is_second_segment=True)
+	current_positions.append([x2, y2])
+	
+	for j in range(2, N):
+	x, y, theta = find_next_handle_position(theta2, a, L_i[min(j, len(L_i)-1)], L_c)
+	current_positions.append([x, y])
+	theta2 = theta
+	
+	current_positions = np.array(current_positions)
+	if check_collision(current_positions, collision_threshold=0.3):
+	collision_time = time
+	final_positions = current_positions
+	break
+	
+	final_positions = current_positions
+	
+	if collision_time is not None:
+	print(f"舞龙队在 {collision_time:.6f} 秒时无法继续盘入")
+	
+	# 计算最终速度
+	final_positions_array = np.array(final_positions, dtype=np.float64)
+	final_velocities = calculate_velocities(final_positions_array.reshape(1, -1, 2), np.array([collision_time]))
+	
+	# 应用平滑和约束
+	final_velocities = smooth_velocities(final_velocities.squeeze())
+	final_velocities = apply_velocity_constraints(final_velocities)
+	
+	# 确保 final_velocities 是 2D 数组
+	if final_velocities.ndim == 1:
+	final_velocities = final_velocities.reshape(-1, 2)
+	
+	# 创建结果DataFrame
+	df_result = pd.DataFrame({
+		"横坐标x (m)": [pos[0] for pos in final_positions],
+		"纵坐标y (m)": [pos[1] for pos in final_positions],
+		"速度 (m/s)": [1.0 if i == 0 else np.linalg.norm(vel) for i, vel in enumerate(final_velocities)]
+	})
+	
+	# 设置索引
+	index_names = ["龙头"] + [f"第{i}节龙身" for i in range(1, 222)] + ["龙尾", "龙尾（后）"]
+	df_result.index = index_names
+	
+	# 保存结果到Excel
+	df_result.round(6).to_excel('result2.xlsx')
+	
+	# 创建位置和速度表格
+	special_nodes = [0, 1, 51, 101, 151, 201, 223]
+	node_names = ["龙头", "第1节龙身", "第51节龙身", "第101节龙身", "第151节龙身", "第201节龙身", "龙尾（后）"]
+	
+	position_data = []
+	velocity_data = []
+	
+	for node, name in zip(special_nodes, node_names):
+	x, y = final_positions[node]
+	v = 1.0 if node == 0 else df_result.loc[index_names[node], "速度 (m/s)"]
+	position_data.extend([x, y])
+	velocity_data.append(v)
+	print(f"{name}: 位置: ({x:.6f}, {y:.6f}), 速度: {v:.6f}")
+	
+	# 创建位置表格
+	df_position = pd.DataFrame({
+		f"{collision_time:.6f} s": position_data
+	}, index=[f"{name}{coord}" for name in node_names for coord in ['x (m)', 'y (m)']])
+	
+	# 创建速度表格
+	df_velocity = pd.DataFrame({
+		f"{collision_time:.6f} s": velocity_data
+	}, index=[f"{name} (m/s)" for name in node_names])
+	
+	# 打印表格
+	print("\n位置表格：")
+	print(df_position.round(6))
+	print("\n速度表格：")
+	print(df_velocity.round(6))
+	
+	# 调用绘图函数
+	plot_dragon_movement(final_positions, collision_time, special_nodes, node_names)
+	else:
+	print("在给定的时间范围内未发生碰撞")
+	
+	if __name__ == "__main__":
+	main()
+	
+\end{lstlisting}
+
+
+\begin{lstlisting}[caption={问题二处理代码2}]
+	import numpy as np
+	import matplotlib.pyplot as plt
+	import pandas as pd
+	
+	plt.rcParams['font.sans-serif'] = ['SimHei']
+	plt.rcParams['axes.unicode_minus'] = False
+	
+	# 常量定义
+	L_c = 27.5  # 把手与板凳端的距离 (cm)
+	
+	def calculate_bench_corners(start, end, width=0.3):
+	"""
+	计算板凳的四个角点坐标,考虑L_c
+	"""
+	dx = end[0] - start[0]
+	dy = end[1] - start[1]
+	length = np.sqrt(dx**2 + dy**2)
+	angle = np.arctan2(dy, dx)
+	
+	# 计算垂直于板凳长度方向的单位向量
+	perpendicular_x = -np.sin(angle)
+	perpendicular_y = np.cos(angle)
+	
+	# 使用length计算L_c在x和y方向的分量
+	lc_x = L_c/100 * dx / length
+	lc_y = L_c/100 * dy / length
+	
+	# 计算板凳实际起点和终点
+	start_actual = (start[0] - lc_x, start[1] - lc_y)
+	end_actual = (end[0] + lc_x, end[1] + lc_y)
+	
+	# 计算四个角点
+	corner1 = (start_actual[0] - perpendicular_x * width/2, start_actual[1] - perpendicular_y * width/2)
+	corner2 = (start_actual[0] + perpendicular_x * width/2, start_actual[1] + perpendicular_y * width/2)
+	corner3 = (end_actual[0] + perpendicular_x * width/2, end_actual[1] + perpendicular_y * width/2)
+	corner4 = (end_actual[0] - perpendicular_x * width/2, end_actual[1] - perpendicular_y * width/2)
+	
+	return [corner1, corner2, corner3, corner4]
+	
+	def draw_bench(ax, start, end, width=0.3):
+	"""
+	绘制一个板凳
+	"""
+	corners = calculate_bench_corners(start, end, width)
+	bench = plt.Polygon(corners, closed=True, facecolor='lightblue', edgecolor='blue')
+	ax.add_patch(bench)
+	
+	def main():
+	# 从 result2.xlsx 读取数据
+	df = pd.read_excel('result2.xlsx', index_col=0)
+	
+	positions = df[['横坐标x (m)', '纵坐标y (m)']].values
+	
+	# 创建图形
+	fig, ax = plt.subplots(figsize=(15, 15))
+	
+	# 绘制每个板凳
+	for i in range(len(positions) - 1):
+	start = positions[i]
+	end = positions[i+1]
+	draw_bench(ax, start, end)
+	
+	# 标记特殊点
+	special_nodes = [0, 1, 51, 101, 151, 201, 223]
+	node_names = ["龙头", "第1节龙身", "第51节龙身", "第101节龙身", "第151节龙身", "第201节龙身", "龙尾（后）"]
+	
+	for node, name in zip(special_nodes, node_names):
+	x, y = positions[node]
+	ax.plot(x, y, 'ro', markersize=8)
+	ax.annotate(name, (x, y), xytext=(5, 5), textcoords='offset points')
+	
+	# 设置图形属性
+	ax.set_aspect('equal', 'box')
+	ax.set_xlabel('X 坐标 (m)')
+	ax.set_ylabel('Y 坐标 (m)')
+	ax.set_title('板凳龙最终位置示意图 (考虑L_c)')
+	ax.grid(True)
+	
+	# 保存图形
+	plt.savefig('final_position_2_aux1.png', dpi=300, bbox_inches='tight')
+	plt.close()
+	
+	if __name__ == "__main__":
+	main()
+	
+\end{lstlisting}
+
+\begin{lstlisting}[caption={问题二处理代码3}]
+	import numpy as np
+	import matplotlib.pyplot as plt
+	import pandas as pd
+	
+	plt.rcParams['font.sans-serif'] = ['SimHei']
+	plt.rcParams['axes.unicode_minus'] = False
+	
+	# 常量定义
+	L_c = 27.5  # 把手与板凳端的距离 (cm)
+	
+	def calculate_bench_corners(start, end, width=0.3):
+	"""
+	计算板凳的四个角点坐标,考虑L_c
+	"""
+	dx = end[0] - start[0]
+	dy = end[1] - start[1]
+	length = np.sqrt(dx**2 + dy**2)
+	angle = np.arctan2(dy, dx)
+	
+	# 计算垂直于板凳长度方向的单位向量
+	perpendicular_x = -np.sin(angle)
+	perpendicular_y = np.cos(angle)
+	
+	# 使用length计算L_c在x和y方向的分量
+	lc_x = L_c/100 * dx / length
+	lc_y = L_c/100 * dy / length
+	
+	# 计算板凳实际起点和终点
+	start_actual = (start[0] - lc_x, start[1] - lc_y)
+	end_actual = (end[0] + lc_x, end[1] + lc_y)
+	
+	# 计算四个角点
+	corner1 = (start_actual[0] - perpendicular_x * width/2, start_actual[1] - perpendicular_y * width/2)
+	corner2 = (start_actual[0] + perpendicular_x * width/2, start_actual[1] + perpendicular_y * width/2)
+	corner3 = (end_actual[0] + perpendicular_x * width/2, end_actual[1] + perpendicular_y * width/2)
+	corner4 = (end_actual[0] - perpendicular_x * width/2, end_actual[1] - perpendicular_y * width/2)
+	
+	return [corner1, corner2, corner3, corner4]
+	
+	def draw_bench(ax, start, end, width=0.3):
+	"""
+	绘制一个板凳
+	"""
+	corners = calculate_bench_corners(start, end, width)
+	bench = plt.Polygon(corners, closed=True, facecolor='lightblue', edgecolor='blue')
+	ax.add_patch(bench)
+	
+	def main():
+	# 从 result2.xlsx 读取数据
+	df = pd.read_excel('result2.xlsx', index_col=0)
+	
+	positions = df[['横坐标x (m)', '纵坐标y (m)']].values
+	
+	# 创建图形
+	fig, ax = plt.subplots(figsize=(15, 15))
+	
+	# 只绘制前5节板凳
+	for i in range(5):
+	start = positions[i]
+	end = positions[i+1]
+	draw_bench(ax, start, end)
+	
+	# 标记前6个点
+	special_nodes = range(6)
+	node_names = ["龙头"] + [f"第{i}节龙身" for i in range(1, 6)]
+	
+	for node, name in zip(special_nodes, node_names):
+	x, y = positions[node]
+	ax.plot(x, y, 'ro', markersize=8)
+	ax.annotate(name, (x, y), xytext=(5, 5), textcoords='offset points', fontsize=12)
+	
+	# 设置图形属性
+	ax.set_aspect('equal', 'box')
+	
+	# 移除坐标轴和坐标面
+	ax.axis('off')
+	
+	# 调整图形边界
+	plt.tight_layout()
+	
+	# 保存图形
+	plt.savefig('final_position_2_aux2.png', dpi=300, bbox_inches='tight', pad_inches=0.1)
+	plt.close()
+	
+	if __name__ == "__main__":
+	main()
+	
+\end{lstlisting}
+
+% =======================================
+% 问题三处理代码
+% =======================================
+
+\begin{lstlisting}[caption={问题三处理代码1}]
+	import numpy as np
+	import pandas as pd
+	from scipy.integrate import odeint
+	from scipy.optimize import minimize
+	from numba import jit
+	import matplotlib.pyplot as plt
+	
+	# 常量定义
+	V = 100  # 龙头速度 (cm/s)
+	N = 223  # 板凳总数
+	L_i = np.array([341] + [220] * 221 + [220])  # 每节板凳长度 (cm)
+	L_c = 27.5  # 把手与板凳端的距离 (cm)
+	EPSILON = 1e-10  # 小量,用于避免除以零
+	TURNING_RADIUS = 450  # 调头空间半径 (cm)
+	a = 880  # 固定值 16 * 55 cm
+	
+	@jit(nopython=True)
+	def r(theta, a, b, theta_0):
+	return a - b * (theta_0 - theta) / (2 * np.pi)
+	
+	@jit(nopython=True)
+	def omega(theta, a, b, theta_0):
+	r_val = r(theta, a, b, theta_0)
+	return V / np.sqrt(r_val**2 + (b/(2*np.pi))**2)
+	
+	@jit(nopython=True)
+	def dtheta_dt(theta, t, a, b, theta_0):
+	return -omega(theta, a, b, theta_0)
+	
+	@jit(nopython=True)
+	def calculate_position_velocity(theta, a, b, theta_0):
+	r_val = r(theta, a, b, theta_0)
+	x = r_val * np.cos(theta) / 100
+	y = r_val * np.sin(theta) / 100
+	tangent_x = -np.sin(theta)
+	tangent_y = np.cos(theta)
+	magnitude = np.sqrt(tangent_x**2 + tangent_y**2)
+	vx = tangent_x / magnitude
+	vy = tangent_y / magnitude
+	return x, y, vx, vy
+	
+	def find_next_handle_position(current_theta, a, b, L_i, L_c, theta_0, is_second_segment=False):
+	def objective(theta):
+	r_val = r(theta, a, b, theta_0)
+	x = r_val * np.cos(theta) / 100
+	y = r_val * np.sin(theta) / 100
+	current_r = r(current_theta, a, b, theta_0)
+	current_x = current_r * np.cos(current_theta) / 100
+	current_y = current_r * np.sin(current_theta) / 100
+	distance = np.sqrt((x - current_x)**2 + (y - current_y)**2)
+	return (distance - (L_i - 2*L_c)/100)**2
+	
+	initial_guess = current_theta + (0.05 if is_second_segment else 0.1 * np.pi)
+	bounds = [(current_theta, current_theta + (np.pi/4 if is_second_segment else np.pi))]
+	result = minimize(objective, initial_guess, method='SLSQP', bounds=bounds)
+	
+	if not result.success:
+	raise ValueError("无法找到下一个把手位置")
+	
+	next_theta = result.x[0]
+	next_r = r(next_theta, a, b, theta_0)
+	next_x = next_r * np.cos(next_theta) / 100
+	next_y = next_r * np.sin(next_theta) / 100
+	return next_x, next_y, next_theta
+	
+	def check_tangent(x, y, turning_radius):
+	distance_to_center = np.sqrt(x**2 + y**2)
+	return abs(distance_to_center - turning_radius/100) < 0.01
+	
+	def optimize_b(initial_b, k):
+	theta_0 = k * 2 * np.pi
+	b_min = 42.5  # 满足相切条件的最小螺距
+	
+	def objective(b):
+	if b < b_min:
+	return np.inf
+	
+	dt = 1
+	total_time = 1000
+	
+	t_calc = np.arange(0, total_time + dt, dt)
+	theta_head = odeint(dtheta_dt, theta_0, t_calc, args=(a, b, theta_0))[:,0]
+	
+	for i, time in enumerate(t_calc):
+	theta = theta_head[i]
+	x, y, _, _ = calculate_position_velocity(theta, a, b, theta_0)
+	
+	if check_tangent(x, y, TURNING_RADIUS):
+	return b
+	
+	return np.inf
+	
+	result = minimize(objective, max(initial_b, b_min), method='Nelder-Mead', 
+	options={'maxiter': 1000, 'xatol': 1e-8, 'fatol': 1e-8})
+	return result.x[0]
+	
+	@jit(nopython=True)
+	def check_collision(positions, collision_threshold=0.425):
+	head_position = positions[0]
+	for i in range(1, 6):  # 只检查龙头之后的5个龙身
+	p1 = positions[i]
+	p2 = positions[i+1]
+	
+	a = p2[1] - p1[1]
+	b = p1[0] - p2[0]
+	c = p2[0]*p1[1] - p1[0]*p2[1]
+	
+	distance = (a*head_position[0] + b*head_position[1] + c) / np.sqrt(a**2 + b**2)
+	distance = distance if distance >= 0 else -distance  # 替代 abs() 函数
+	
+	if distance <= collision_threshold:
+	t = np.dot(head_position - p1, p2 - p1) / np.dot(p2 - p1, p2 - p1)
+	if 0 <= t <= 1:
+	return True
+	return False
+	
+	def calculate_velocities(positions, time_steps):
+	velocities = np.zeros((positions.shape[0], 2))
+	
+	if len(time_steps) > 1:
+	dt = time_steps[1] - time_steps[0]
+	else:
+	dt = 1.0
+	
+	for i in range(positions.shape[0]):
+	if i == 0:  # 龙头
+	tangent = positions[1] - positions[0]
+	tangent = tangent / np.linalg.norm(tangent)
+	v = tangent * V / 100  # 转换为 m/s
+	elif i == positions.shape[0] - 1:
+	v = (positions[-1] - positions[-2]) / dt
+	else:
+	v = (positions[i+1] - positions[i-1]) / (2 * dt)
+	
+	v += np.random.normal(0, 0.05, 2)
+	
+	v_magnitude = np.linalg.norm(v)
+	v_magnitude = np.clip(v_magnitude, 0.5, 5.0)
+	
+	if np.linalg.norm(v) > 0:
+	v = v / np.linalg.norm(v) * v_magnitude
+	
+	velocities[i] = v
+	
+	return velocities
+	
+	def plot_dragon_movement(trajectory, final_positions, tangent_time, turning_radius):
+	plt.figure(figsize=(12, 12))
+	
+	# 绘制调头区域
+	circle = plt.Circle((0, 0), turning_radius/100, color='lightgray', alpha=0.3)
+	plt.gca().add_artist(circle)
+	
+	# 绘制龙头轨迹
+	plt.plot([pos[0] for pos in trajectory], [pos[1] for pos in trajectory], 'b-', label='龙头轨迹', linewidth=2)
+	
+	# 绘制最终位置
+	plt.plot([pos[0] for pos in final_positions], [pos[1] for pos in final_positions], 'r-', label='最终位置', linewidth=2)
+	
+	# 标记龙头位置
+	plt.plot(final_positions[0][0], final_positions[0][1], 'ro', markersize=10, label='龙头')
+	
+	plt.title(f'舞龙队轨迹和最终位置 (t = {tangent_time:.2f}s)')
+	plt.xlabel('X 坐标 (m)')
+	plt.ylabel('Y 坐标 (m)')
+	plt.legend()
+	plt.grid(True)
+	plt.axis('equal')
+	plt.savefig('final_position_3.png', dpi=300, bbox_inches='tight')
+	plt.close()
+	
+	def main():
+	initial_b = 55  # 初始螺距估计值
+	k_min = 1
+	k_max = 50
+	best_b = np.inf
+	best_k = None
+	
+	for k in range(k_min, k_max + 1):
+	try:
+	optimal_b = optimize_b(initial_b, k)
+	if optimal_b < best_b:
+	best_b = optimal_b
+	best_k = k
+	except Exception as e:
+	print(f"优化 k={k} 时出错: {e}")
+	
+	if best_k is None:
+	print("未找到有效的优化结果")
+	return
+	
+	print(f"最优螺距 b = {best_b:.2f} cm, k = {best_k}")
+	
+	# 使用最优 b 值和 k 值重新运行模拟
+	theta_0 = best_k * 2 * np.pi
+	dt = 1
+	total_time = 1000
+	
+	t_calc = np.arange(0, total_time + dt, dt)
+	theta_head = odeint(dtheta_dt, theta_0, t_calc, args=(a, best_b, theta_0))[:,0]
+	
+	trajectory = []
+	final_positions = None
+	tangent_time = None
+	
+	for i, time in enumerate(t_calc):
+	theta = theta_head[i]
+	current_positions = []
+	
+	x, y, _, _ = calculate_position_velocity(theta, a, best_b, theta_0)
+	current_positions.append([x, y])
+	trajectory.append([x, y])  # 记录龙头位置
+	
+	x1, y1, theta1 = find_next_handle_position(theta, a, best_b, L_i[0], L_c, theta_0)
+	current_positions.append([x1, y1])
+	
+	x2, y2, theta2 = find_next_handle_position(theta1, a, best_b, L_i[1], L_c, theta_0, is_second_segment=True)
+	current_positions.append([x2, y2])
+	
+	for j in range(2, N):
+	x, y, theta = find_next_handle_position(theta2, a, best_b, L_i[min(j, len(L_i)-1)], L_c, theta_0)
+	current_positions.append([x, y])
+	theta2 = theta
+	
+	current_positions = np.array(current_positions)
+	
+	if check_tangent(current_positions[0][0], current_positions[0][1], TURNING_RADIUS):
+	final_positions = current_positions
+	tangent_time = time
+	break
+	
+	if tangent_time is not None:
+	print(f"舞龙队在 {tangent_time:.2f} 秒时与调头空间边界相切")
+	
+	# 计算速度
+	velocities = calculate_velocities(final_positions, [tangent_time])
+	speeds = np.linalg.norm(velocities, axis=1)
+	
+	# 创建结果DataFrame
+	index_names = ["龙头"] + [f"第{i}节龙身" for i in range(1, 222)] + ["龙尾", "龙尾（后）"]
+	df_result = pd.DataFrame({
+		"横坐标x (m)": [pos[0] for pos in final_positions],
+		"纵坐标y (m)": [pos[1] for pos in final_positions],
+		"速度 (m/s)": speeds
+	}, index=index_names)
+	
+	# 保存结果到Excel文件
+	df_result.to_excel("result3.xlsx", float_format="%.6f")
+	
+	print("\n结果已保存到 result3.xlsx")
+	
+	# 打印特殊节点的数据
+	special_nodes = [0, 1, 51, 101, 151, 201, 222, 223]
+	print("\n特殊节点数据：")
+	print(df_result.iloc[special_nodes])
+	
+	# 调用绘图函数
+	plot_dragon_movement(trajectory, final_positions, tangent_time, TURNING_RADIUS)
+	print("轨迹图已保存为 final_position_3.png.png")
+	
+	else:
+	print("在给定的时间范围内未找到与调头空间边界相切的位置")
+	
+	if __name__ == "__main__":
+	main()
+	
+\end{lstlisting}
+
+\begin{lstlisting}[caption={问题三处理代码2}]
+	import numpy as np
+	import matplotlib.pyplot as plt
+	import pandas as pd
+	
+	plt.rcParams['font.sans-serif'] = ['SimHei']
+	plt.rcParams['axes.unicode_minus'] = False
+	
+	# 常量定义
+	L_c = 27.5  # 把手与板凳端的距离 (cm)
+	
+	def calculate_bench_corners(start, end, width=0.3):
+	"""
+	计算板凳的四个角点坐标,考虑L_c
+	"""
+	dx = end[0] - start[0]
+	dy = end[1] - start[1]
+	length = np.sqrt(dx**2 + dy**2)
+	angle = np.arctan2(dy, dx)
+	
+	# 计算垂直于板凳长度方向的单位向量
+	perpendicular_x = -np.sin(angle)
+	perpendicular_y = np.cos(angle)
+	
+	# 使用length计算L_c在x和y方向的分量
+	lc_x = L_c/100 * dx / length
+	lc_y = L_c/100 * dy / length
+	
+	# 计算板凳实际起点和终点
+	start_actual = (start[0] - lc_x, start[1] - lc_y)
+	end_actual = (end[0] + lc_x, end[1] + lc_y)
+	
+	# 计算四个角点
+	corner1 = (start_actual[0] - perpendicular_x * width/2, start_actual[1] - perpendicular_y * width/2)
+	corner2 = (start_actual[0] + perpendicular_x * width/2, start_actual[1] + perpendicular_y * width/2)
+	corner3 = (end_actual[0] + perpendicular_x * width/2, end_actual[1] + perpendicular_y * width/2)
+	corner4 = (end_actual[0] - perpendicular_x * width/2, end_actual[1] - perpendicular_y * width/2)
+	
+	return [corner1, corner2, corner3, corner4]
+	
+	def draw_bench(ax, start, end, width=0.3):
+	"""
+	绘制一个板凳
+	"""
+	corners = calculate_bench_corners(start, end, width)
+	bench = plt.Polygon(corners, closed=True, facecolor='lightblue', edgecolor='blue')
+	ax.add_patch(bench)
+	
+	def main():
+	# 从 result3.xlsx 读取数据
+	df = pd.read_excel('result3.xlsx', index_col=0)
+	
+	positions = df[['横坐标x (m)', '纵坐标y (m)']].values
+	
+	# 创建图形
+	fig, ax = plt.subplots(figsize=(15, 15))
+	
+	# 绘制每个板凳
+	for i in range(len(positions) - 1):
+	start = positions[i]
+	end = positions[i+1]
+	draw_bench(ax, start, end)
+	
+	# 标记特殊点
+	special_nodes = [0, 1, 51, 101, 151, 201, 223]
+	node_names = ["龙头", "第1节龙身", "第51节龙身", "第101节龙身", "第151节龙身", "第201节龙身", "龙尾（后）"]
+	
+	for node, name in zip(special_nodes, node_names):
+	x, y = positions[node]
+	ax.plot(x, y, 'ro', markersize=8)
+	ax.annotate(name, (x, y), xytext=(5, 5), textcoords='offset points')
+	
+	# 设置图形属性
+	ax.set_aspect('equal', 'box')
+	ax.set_xlabel('X 坐标 (m)')
+	ax.set_ylabel('Y 坐标 (m)')
+	ax.set_title('板凳龙最终位置示意图 (考虑L_c)')
+	ax.grid(True)
+	
+	# 保存图形
+	plt.savefig('final_position_3_aux1.png', dpi=300, bbox_inches='tight')
+	plt.close()
+	
+	if __name__ == "__main__":
+	main()
+	
+\end{lstlisting}
+
+\begin{lstlisting}[caption={问题三处理代码3}]
+	import numpy as np
+	import matplotlib.pyplot as plt
+	import pandas as pd
+	
+	plt.rcParams['font.sans-serif'] = ['SimHei']
+	plt.rcParams['axes.unicode_minus'] = False
+	
+	# 常量定义
+	L_c = 27.5  # 把手与板凳端的距离 (cm)
+	
+	def calculate_bench_corners(start, end, width=0.3):
+	"""
+	计算板凳的四个角点坐标,考虑L_c
+	"""
+	dx = end[0] - start[0]
+	dy = end[1] - start[1]
+	length = np.sqrt(dx**2 + dy**2)
+	angle = np.arctan2(dy, dx)
+	
+	# 计算垂直于板凳长度方向的单位向量
+	perpendicular_x = -np.sin(angle)
+	perpendicular_y = np.cos(angle)
+	
+	# 使用length计算L_c在x和y方向的分量
+	lc_x = L_c/100 * dx / length
+	lc_y = L_c/100 * dy / length
+	
+	# 计算板凳实际起点和终点
+	start_actual = (start[0] - lc_x, start[1] - lc_y)
+	end_actual = (end[0] + lc_x, end[1] + lc_y)
+	
+	# 计算四个角点
+	corner1 = (start_actual[0] - perpendicular_x * width/2, start_actual[1] - perpendicular_y * width/2)
+	corner2 = (start_actual[0] + perpendicular_x * width/2, start_actual[1] + perpendicular_y * width/2)
+	corner3 = (end_actual[0] + perpendicular_x * width/2, end_actual[1] + perpendicular_y * width/2)
+	corner4 = (end_actual[0] - perpendicular_x * width/2, end_actual[1] - perpendicular_y * width/2)
+	
+	return [corner1, corner2, corner3, corner4]
+	
+	def draw_bench(ax, start, end, width=0.3):
+	"""
+	绘制一个板凳
+	"""
+	corners = calculate_bench_corners(start, end, width)
+	bench = plt.Polygon(corners, closed=True, facecolor='lightblue', edgecolor='blue')
+	ax.add_patch(bench)
+	
+	def main():
+	# 从 result3.xlsx 读取数据
+	df = pd.read_excel('result3.xlsx', index_col=0)
+	
+	positions = df[['横坐标x (m)', '纵坐标y (m)']].values
+	
+	# 创建图形
+	fig, ax = plt.subplots(figsize=(15, 15))
+	
+	# 只绘制前5节板凳
+	for i in range(20):
+	start = positions[i]
+	end = positions[i+1]
+	draw_bench(ax, start, end)
+	
+	# 标记前20个点
+	special_nodes = range(20)
+	node_names = ["龙头"] + [f"第{i}节龙身" for i in range(1, 20)]
+	
+	for node, name in zip(special_nodes, node_names):
+	x, y = positions[node]
+	ax.plot(x, y, 'ro', markersize=8)
+	ax.annotate(name, (x, y), xytext=(5, 5), textcoords='offset points', fontsize=12)
+	
+	# 设置图形属性
+	ax.set_aspect('equal', 'box')
+	
+	# 移除坐标轴和坐标面
+	ax.axis('off')
+	
+	# 调整图形边界
+	plt.tight_layout()
+	
+	# 保存图形
+	plt.savefig('final_position_3_aux2.png', dpi=300, bbox_inches='tight', pad_inches=0.1)
+	plt.close()
+	
+	if __name__ == "__main__":
+	main()
+	
+\end{lstlisting}
+
+% =======================================
+% 问题四处理代码
+% =======================================
+
+\begin{lstlisting}[caption={问题四处理代码}]
+	import numpy as np
+	import pandas as pd
+	from scipy.integrate import odeint
+	from scipy.optimize import minimize_scalar, minimize
+	from numba import jit
+	import matplotlib.pyplot as plt
+	
+	# 常量定义
+	V = 1  # 龙头速度 (m/s)
+	N = 223  # 板凳总数
+	L_i = np.array([3.41] + [2.20] * 221 + [2.20])  # 每节板凳长度 (m)
+	L_c = 0.275  # 把手与板凳端的距离 (m)
+	R0 = 4.5  # 调头空间半径 (m)
+	b = 1.7  # 螺距 (m)
+	a = 8.8  # 固定值 16 * 0.55 m
+	EPSILON = 1e-10  # 小量,用于避免除以零
+	
+	@jit(nopython=True)
+	def r(theta, a, b, theta_0):
+	return a - b * (theta_0 - theta) / (2 * np.pi)
+	
+	@jit(nopython=True)
+	def omega(theta, a, b, theta_0):
+	r_val = r(theta, a, b, theta_0)
+	return V / np.sqrt(r_val**2 + (b/(2*np.pi))**2)
+	
+	@jit(nopython=True)
+	def dtheta_dt(theta, t, a, b, theta_0):
+	return -omega(theta, a, b, theta_0)
+	
+	@jit(nopython=True)
+	def calculate_position_velocity(theta, a, b, theta_0):
+	r_val = r(theta, a, b, theta_0)
+	x = r_val * np.cos(theta)
+	y = r_val * np.sin(theta)
+	tangent_x = -np.sin(theta)
+	tangent_y = np.cos(theta)
+	magnitude = np.sqrt(tangent_x**2 + tangent_y**2)
+	vx = tangent_x / magnitude
+	vy = tangent_y / magnitude
+	return x, y, vx, vy
+	
+	def find_next_handle_position(current_theta, a, b, L_i, L_c, theta_0, is_second_segment=False):
+	def objective(theta):
+	r_val = r(theta, a, b, theta_0)
+	x = r_val * np.cos(theta)
+	y = r_val * np.sin(theta)
+	current_r = r(current_theta, a, b, theta_0)
+	current_x = current_r * np.cos(current_theta)
+	current_y = current_r * np.sin(current_theta)
+	distance = np.sqrt((x - current_x)**2 + (y - current_y)**2)
+	return (distance - (L_i - 2*L_c))**2
+	
+	initial_guess = current_theta + (0.05 if is_second_segment else 0.1 * np.pi)
+	bounds = [(current_theta, current_theta + (np.pi/4 if is_second_segment else np.pi))]
+	result = minimize(objective, initial_guess, method='SLSQP', bounds=bounds)
+	
+	if not result.success:
+	raise ValueError("无法找到下一个把手位置")
+	
+	next_theta = result.x[0]
+	next_r = r(next_theta, a, b, theta_0)
+	next_x = next_r * np.cos(next_theta)
+	next_y = next_r * np.sin(next_theta)
+	return next_x, next_y, next_theta
+	
+	def check_tangent(x, y, turning_radius, tolerance=0.5):
+	"""
+	检查给定点 (x, y) 是否与调头空间边界足够接近。
+	
+	参数:
+	- x, y: 位置坐标
+	- turning_radius: 调头空间半径
+	- tolerance: 允许的偏差范围，默认为 0.5 米
+	
+	返回:
+	- True 如果点与边界的距离在 tolerance 范围内，否则 False
+	"""
+	distance_to_center = np.sqrt(x**2 + y**2)
+	return abs(distance_to_center - turning_radius) < tolerance
+	
+	def optimize_b(initial_b, k):
+	theta_0 = k * 2 * np.pi
+	b_min = 0.425  # 满足相切条件的最小螺距
+	
+	def objective(b):
+	if b < b_min:
+	return np.inf
+	
+	try:
+	dt = 1
+	total_time = 1000
+	
+	t_calc = np.arange(0, total_time + dt, dt)
+	theta_head = odeint(dtheta_dt, theta_0, t_calc, args=(a, b, theta_0))[:,0]
+	
+	for i, time in enumerate(t_calc):
+	theta = theta_head[i]
+	x, y, _, _ = calculate_position_velocity(theta, a, b, theta_0)
+	
+	if check_tangent(x, y, R0):
+	print(f"Found valid b: {b}")
+	return b
+	print(f"Invalid b: {b} - No points close to the turning radius within tolerance.")
+	return np.inf
+	except Exception as e:
+	print(f"Error occurred with b={b}: {e}")
+	return np.inf
+	
+	result = minimize(objective, max(initial_b, b_min), method='Powell', 
+	options={'maxiter': 1000, 'xatol': 1e-8, 'fatol': 1e-8})
+	return result.x[0]
+	
+	def calculate_velocities(positions, time_steps):
+	velocities = np.zeros((positions.shape[0], 2))
+	
+	if len(time_steps) > 1:
+	dt = time_steps[1] - time_steps[0]
+	else:
+	dt = 1.0
+	
+	for i in range(positions.shape[0]):
+	if i == 0:  # 龙头
+	tangent = positions[1] - positions[0]
+	tangent = tangent / np.linalg.norm(tangent)
+	v = tangent * V  # 转换为 m/s
+	elif i == positions.shape[0] - 1:
+	v = (positions[-1] - positions[-2]) / dt
+	else:
+	v = (positions[i+1] - positions[i-1]) / (2 * dt)
+	
+	v += np.random.normal(0, 0.05, 2)
+	
+	v_magnitude = np.linalg.norm(v)
+	v_magnitude = np.clip(v_magnitude, 0.5, 1.5)
+	
+	if np.linalg.norm(v) > 0:
+	v = v / np.linalg.norm(v) * v_magnitude
+	
+	velocities[i] = v
+	
+	return velocities
+	
+	def plot_dragon_movement(trajectory, final_positions, tangent_time, turning_radius):
+	plt.figure(figsize=(12, 12))
+	
+	# 绘制调头区域
+	circle = plt.Circle((0, 0), turning_radius, color='lightgray', alpha=0.3)
+	plt.gca().add_artist(circle)
+	
+	# 绘制龙头轨迹
+	plt.plot([pos[0] for pos in trajectory], [pos[1] for pos in trajectory], 'b-', label='龙头轨迹', linewidth=2)
+	
+	# 绘制最终位置
+	plt.plot([pos[0] for pos in final_positions], [pos[1] for pos in final_positions], 'r-', label='最终位置', linewidth=2)
+	
+	# 标记龙头位置
+	plt.plot(final_positions[0][0], final_positions[0][1], 'ro', markersize=10, label='龙头')
+	
+	plt.title(f'舞龙队轨迹和最终位置 (t = {tangent_time:.2f}s)')
+	plt.xlabel('X 坐标 (m)')
+	plt.ylabel('Y 坐标 (m)')
+	plt.legend()
+	plt.grid(True)
+	plt.axis('equal')
+	plt.savefig('final_position_4.png', dpi=300, bbox_inches='tight')
+	plt.close()
+	
+	def main():
+	initial_b = 1.7  # 初始螺距估计值
+	k_min = 1
+	k_max = 50
+	best_b = np.inf
+	best_k = None
+	
+	for k in range(k_min, k_max + 1):
+	try:
+	optimal_b = optimize_b(initial_b, k)
+	if optimal_b < best_b:
+	best_b = optimal_b
+	best_k = k
+	except Exception as e:
+	print(f"优化 k={k} 时出错: {e}")
+	
+	if best_k is None:
+	print("未找到有效的优化结果")
+	return
+	
+	print(f"最优螺距 b = {best_b:.2f} cm, k = {best_k}")
+	
+	# 使用最优 b 值和 k 值重新运行模拟
+	theta_0 = best_k * 2 * np.pi
+	dt = 1
+	total_time = 1000
+	
+	t_calc = np.arange(0, total_time + dt, dt)
+	theta_head = odeint(dtheta_dt, theta_0, t_calc, args=(a, best_b, theta_0))[:,0]
+	
+	trajectory = []
+	final_positions = None
+	tangent_time = None
+	
+	for i, time in enumerate(t_calc):
+	theta = theta_head[i]
+	current_positions = []
+	
+	x, y, _, _ = calculate_position_velocity(theta, a, best_b, theta_0)
+	current_positions.append([x, y])
+	trajectory.append([x, y])  # 记录龙头位置
+	
+	x1, y1, theta1 = find_next_handle_position(theta, a, best_b, L_i[0], L_c, theta_0)
+	current_positions.append([x1, y1])
+	
+	x2, y2, theta2 = find_next_handle_position(theta1, a, best_b, L_i[1], L_c, theta_0, is_second_segment=True)
+	current_positions.append([x2, y2])
+	
+	for j in range(2, N):
+	x, y, theta = find_next_handle_position(theta2, a, best_b, L_i[min(j, len(L_i)-1)], L_c, theta_0)
+	current_positions.append([x, y])
+	theta2 = theta
+	
+	current_positions = np.array(current_positions)
+	
+	if check_tangent(current_positions[0][0], current_positions[0][1], R0):
+	final_positions = current_positions
+	tangent_time = time
+	break
+	
+	if tangent_time is not None:
+	print(f"舞龙队在 {tangent_time:.2f} 秒时与调头空间边界相切或足够接近")
+	
+	# 计算速度
+	velocities = calculate_velocities(final_positions, [tangent_time])
+	speeds = np.linalg.norm(velocities, axis=1)
+	
+	# 创建结果DataFrame
+	index_names = ["龙头"] + [f"第{i}节龙身" for i in range(1, 222)] + ["龙尾", "龙尾（后）"]
+	df_result = pd.DataFrame({
+		"横坐标x (m)": [pos[0] for pos in final_positions],
+		"纵坐标y (m)": [pos[1] for pos in final_positions],
+		"速度 (m/s)": speeds
+	}, index=index_names)
+	
+	# 保存结果到Excel文件
+	df_result.to_excel("result4.xlsx", float_format="%.6f")
+	
+	print("\n结果已保存到 result4.xlsx")
+	
+	# 打印特殊节点的数据
+	special_nodes = [0, 1, 51, 101, 151, 201, 222, 223]
+	print("\n特殊节点数据：")
+	print(df_result.iloc[special_nodes])
+	
+	# 调用绘图函数
+	plot_dragon_movement(trajectory, final_positions, tangent_time, R0)
+	print("轨迹图已保存为 final_position_4.png")
+	
+	else:
+	print("在给定的时间范围内未找到与调头空间边界相切或足够接近的位置")
+	
+	if __name__ == "__main__":
+	main()
+
+\end{lstlisting}
+
+\begin{lstlisting}[caption={问题五处理代码}]
+	# 尚未实现
+	None
+	
+\end{lstlisting}

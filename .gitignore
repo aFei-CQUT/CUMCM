@@ -1,0 +1,42 @@
+# 默认忽略的文件
+/shelf/
+/workspace.xml
+
+# 基于编辑器的 HTTP 客户端请求
+/httpRequests/
+
+# 数据源本地存储忽略的文件
+/dataSources/
+/dataSources.local.xml
+
+# 忽略特定扩展名的文件
+*.log
+*.docx
+# 忽略以 temp 开头的文件
+temp*
+/第一次模拟训练A题/Python处理代码/__pycache__
+*.pyc
+*.png
+第二次模拟训练B题/2024年第二次模拟训练B题-吕贵臣.doc
+*.tmp
+*.aux
+*.gz
+*.pdf
+*.doc
+*.pdf
+*.zip
+*.zip
+*.csv
+第三次模拟训练A题/src/align_comments.py
+2024CUMCM/论文/当前目录内容.txt
+2024CUMCM/论文/parper.out
+2024CUMCM/论文/parper.bbl
+2024CUMCM/论文/parper.blg
+2024CUMCM/论文/parper.out
+2024CUMCM/源码/~$result1.xlsx
+2024CUMCM/源码/result1.xlsx
+2024CUMCM/源码/result1.xlsx
+*.xlsx
+*.xlsx
+*.xlsx
+*.xlsx

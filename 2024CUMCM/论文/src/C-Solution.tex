@@ -1,0 +1,916 @@
+% =======================================
+% 模型建立与求解
+% =======================================
+
+
+
+
+
+
+
+
+
+
+
+\mcmSection{模型建立与求解}
+% =======================================
+% 问题一的模型建立与求解
+% =======================================
+
+\mcmSubsection{问题一：盘龙队内旋等距螺旋线的数学模型}
+
+
+\begin{figure}[htbp]
+	\centering
+		\includegraphics[width=0.8\textwidth]{../res/1.png}
+	\caption{螺旋线轨迹示意图}
+	\label{fig:螺旋线轨迹示意图}
+\end{figure}
+
+在问题一中,已知初始时,龙头位于螺线第16圈A点处(见图1),等距螺旋线螺距b,龙头前把手中心的行进速度,要求我们建立刻画盘龙队行进轨迹的等距螺旋线模型(内旋)。并给出从初始时刻到300 s为止,每秒各把手中心沿等距螺旋模型的位置、速度,所有结果依附件存储到result1.xlsx中；并在论文以表1,表二的格式,列出0 s、60 s、120 s、180 s、240 s、300 s时,龙头前把手、龙头后面第1、51、101、151、201节龙身前把手和龙尾后把手的位置和速度。
+
+\mcmSubsubsection{盘龙队内旋等距螺旋线模型的建立}
+% 简要说明建立模型所需知识的原理
+% 详细的计算过程、推导过程
+% 推导结果的汇总
+
+阿基米德螺线外旋的基本形式
+\begin{equation}
+	r(\theta)=  a + \frac{b\theta}{2\pi}
+\end{equation}
+
+\textbf{盘龙队龙头建模分析：}
+
+因盘龙队顺时针盘入,我们建立相应的极坐标系$r(\rho,\theta)$,并规定极角$\theta$沿逆时针方向增大,沿顺时针方向减小。
+
+\begin{figure}[htbp]
+	\centering
+	\includegraphics[width=0.8\textwidth, keepaspectratio]{../res/2.png}
+	\caption{极坐标系示意图}
+	\label{fig:极坐标系示意图}
+\end{figure}
+
+$0$时刻时板凳龙队伍顺时针从第16圈旋入,则初始角度为32$\pi$,龙头沿$A$点盘入后$\theta$角度不断减小,相应径矢的模也在减小,且已知龙头的行进速度V 恒定,由$v = \omega \cdot r $知,角速度 $\omega$ 增大。则按上述分析建立极坐标系下盘龙队的行进轨迹方程为：
+
+\begin{equation}
+	r(\theta) = a - \frac{b(32\pi - \theta)}{2\pi}
+\end{equation}
+
+其中,$\theta$为极角；r 为极径；b为螺距,a为初始极径参数。
+
+(2)式由极坐标系和笛卡尔坐标系之间的转换关系,可得直角坐标系中盘龙各把手中心位置的轨迹方程为：
+\begin{equation}
+	\left\{\begin{matrix}x=r(\theta)\cos(\theta)\\y=r(\theta)\sin(\theta)\end{matrix}\right.
+\end{equation}
+
+(3)式对时间$t$求导,因为$\theta$是$t$的函数,这里应用链式法则：
+
+\begin{equation}
+	\begin{cases}
+		\frac{dx}{dt} = \frac{dr}{d\theta}\frac{d\theta}{dt}\cos(\theta) - r(\theta)\sin(\theta)\frac{d\theta}{dt} \\
+		\frac{dy}{dt} = \frac{dr}{d\theta}\frac{d\theta}{dt}\sin(\theta) + r(\theta)\cos(\theta)\frac{d\theta}{dt}
+	\end{cases}
+\end{equation}
+
+其中,
+\begin{equation}
+	\frac{dr}{d\theta} = \frac{b}{2\pi}
+\end{equation}
+
+规定角速度沿顺时针为正($\omega$为正),微小时间内极角变化率$\frac{d\theta}{dt}$为负数,由近似圆弧假设及角速度和线速度的关系可得$\omega=-\frac{d\theta}{dt}$,代入(4)式有,
+
+\begin{equation}
+	\begin{cases}
+		V_x = -(\frac{b}{2\pi}\cos(\theta) - r(\theta)\sin(\theta))\omega \\
+		V_y = -(\frac{b}{2\pi}\sin(\theta) + r(\theta)\cos(\theta))\omega
+	\end{cases}
+\end{equation}
+
+又因龙头行进合速度保持不变,即$V \equiv 1 $,水平方向速度和竖直方向速度经矢量合成有,
+\begin{equation}
+	V=\sqrt{V_x^2+V_y^2}=1
+\end{equation}
+
+展开化简可得,
+\begin{equation}
+	\omega = -\frac{d\theta}{dt} = \frac{1}{\sqrt{r^2(\theta)+(\frac{b}{2\pi})^2}}
+\end{equation}
+
+由(2)(3)(8)可知,
+
+\begin{equation}
+	r(t) = a - \frac{b(32\pi - \theta(t))}{2\pi}
+\end{equation}
+
+\begin{equation}
+	\left\{\begin{matrix}x_i(t)=r(t)\cos(\theta(t)) \\
+		y_i(t)=r(t)\sin(\theta(t))\end{matrix}\right.
+\end{equation}
+
+这说明极径是与时间相关联的函数,相应的直角坐标系下的横纵坐标位置也为与时间相关联的方程,这与我们的常识是相符的。
+
+现考虑盘龙队行进微小位移,所经微小弧可近似为圆,此时切线方向的速度$V_t$即行进速度$V$,有：
+\begin{equation}
+	V =\omega r(t)
+\end{equation}
+
+龙头把手中心沿螺旋线以恒定速度前进,把手在微小时间段$dt$内的位移近似为直线,则
+每段微小时间段$dt$时间内, 龙头在螺旋线上行进的弧长可表示为:
+
+\begin{equation}
+	ds=\sqrt{(d x)^2+(d y)^2}
+\end{equation}
+
+将螺旋线的参数方程代入,得
+
+\begin{equation}
+	ds=\sqrt{\left(r^{\prime}(\theta) \cos (\theta)-r(t) \sin (\theta)\right)^2+\left(r^{\prime}(\theta) \sin (\theta)+r(t) \cos (\theta)\right)^2} \: d\theta
+\end{equation}
+
+\textbf{盘龙队龙身龙尾建模分析}：
+
+记$t$ 为时间,$t_{\text {step }}$ 为程序所设定的时间步长,$L_i$为各板凳长度,$L_c$为把手与近端板凳端的相接长度,盘龙过程中各把手中心均沿螺线行进,则把手中心既在等距螺线方程确定的轨迹上,也在板凳宽度减去两端相接长度为直径的圆上,由上述阐述可知,下一个把手的位置可由上一个把手的位置以$L_i - 2 \times L_c$为直径画圆与行进轨迹方程递推求得,相应的数学表达形式如下：
+
+\begin{equation}
+	\sqrt{(x_{i+1}-x_i)^2+(y_{i+1}-y_i)^2}=L_i - 2 \times L_c
+\end{equation}
+
+当前把手中心和下一个把手中心均在螺线上,由公式(2)(3)(14)得如下方程组,
+
+\begin{equation}
+	\begin{cases}
+		\sqrt{(x_{i+1}-x_i)^2+(y_{i+1}-y_i)^2} = L_i - 2 \times L_c \\[1ex]
+		r(\theta_i) = a - \frac{b(32\pi - \theta_i)}{2\pi} \\[1ex]
+		r(\theta_{i+1}) = a - \frac{b(32\pi - \theta_{i+1})}{2\pi} \\[1ex]
+		x_i = r(\theta_i) \cos(\theta_i) \\[1ex]
+		y_i = r(\theta_i) \sin(\theta_i) \\[1ex]
+		x_{i+1} = r(\theta_{i+1}) \cos(\theta_{i+1}) \\[1ex]
+		y_{i+1} = r(\theta_{i+1}) \sin(\theta_{i+1})
+	\end{cases}
+\end{equation}
+
+若已知$i$状态下的位置,可递推求解$i+1\text{,}i+2\cdots$状态下的位置。相应的速度迭代公式可由下述方程,或公式(12)(13)积分后除以时间求得：
+\begin{equation}
+	v_i(t)=\frac{\sqrt{\left(x_{i+1}(t)-x_i(t)\right)^2+\left(y_{i+1}(t)-y_i(t)\right)^2}}{t_{\text {step }}}
+\end{equation}
+
+\mcmSubsubsection{盘龙队行进轨迹位置、速度的求解}
+% 求解思路,计算结果表格、图像,结果分析
+% 更深入一步的探索,控制变量,敏感度分析
+
+由上述所述公式(2)(8)(14)(15),利用python软件,使用龙格库塔数值积分求解每个时刻(也即每个$\theta$)处龙头的位置,再使用基于雅可比的混合牛顿迭代法迭代龙头把手后续每个把手的位置。依据每个时刻位置的距离与时间步长,近似求解出每处把手的速度。其求解示意图及部分位置、速度结果如下,相应python代码见附件B第一题的处理代码。
+
+\begin{center}
+	\setlength{\tabcolsep}{4pt} % 调整这个值以改变列间距
+	\begin{longtable}{@{}crrrrrr@{}}
+		\caption{问题一部分位置求解结果\label{tab:问题1部分位置求解结果}}\\
+		\toprule
+		位置 & 0 s & 60 s & 120 s & 180 s & 240 s & 300 s \\ 
+		\midrule
+		\endfirsthead
+		
+		\multicolumn{7}{c}%
+		{\tablename\ \thetable{} -- 续} \\
+		\toprule
+		位置 & 0 s & 60 s & 120 s & 180 s & 240 s & 300 s \\ 
+		\midrule
+		\endhead
+		
+		\midrule
+		\multicolumn{7}{r}{{续下页}} \\
+		\endfoot
+		
+		\bottomrule
+		\endlastfoot
+		
+		龙头x (m) & 8.800000 & 5.799207 & -4.084901 & -2.963584 & 2.594451 & 4.420304 \\
+		龙头y (m) & -0.000000 & -5.771095 & -6.304470 & 6.094792 & -5.356763 & 2.320368 \\
+		第1节龙身x (m) & 8.363824 & 7.456756 & -1.445488 & -5.237100 & 4.821192 & 2.459547 \\
+		第1节龙身y (m) & 2.826544 & -3.440402 & -7.405879 & 4.359648 & -3.561986 & 4.402442 \\
+		第51节龙身x (m) & -9.518732 & -8.686316 & -5.543137 & 2.890480 & 5.979985 & -6.301340 \\
+		第51节龙身y (m) & 1.341137 & 2.540111 & 6.377956 & 7.249279 & -3.827798 & 0.465896 \\
+		第101节龙身x (m) & 2.913983 & 5.687113 & 5.361926 & 1.898768 & -4.917408 & -6.237686 \\
+		第101节龙身y (m) & -9.918311 & -8.001386 & -7.557647 & -8.471620 & -6.379845 & 3.936064 \\
+		第151节龙身x (m) & 10.861726 & 6.682314 & 2.388773 & 1.005181 & 2.965422 & 7.040775 \\
+		第151节龙身y (m) & 1.828753 & 8.134542 & 9.727407 & 9.424748 & 8.399704 & 4.392956 \\
+		第201节龙身x (m) & 4.555102 & -6.619661 & -10.627208 & -9.287731 & -7.457181 & -7.458700 \\
+		第201节龙身y (m) & 10.725118 & 9.025572 & 1.359863 & -4.246648 & -6.180690 & -5.263329 \\
+		龙尾（后）x (m) & -5.305444 & 7.364555 & 10.974349 & 7.383915 & 3.241096 & 1.785099 \\
+		龙尾（后）y (m) & -10.676584 & -8.797994 & 0.843457 & 7.492351 & 9.469321 & 9.301151 \\
+	\end{longtable}
+\end{center}
+
+\begin{center}
+	\setlength{\tabcolsep}{7pt} % 使用与上表相同的列间距
+	\begin{longtable}{@{}crrrrrr@{}}
+		\caption{问题一部分速度求解结果\label{tab:问题一部分速度求解结果}}\\
+		\toprule
+		速度 & 0 s & 60 s & 120 s & 180 s & 240 s & 300 s \\ 
+		\midrule
+		\endfirsthead
+		
+		\multicolumn{7}{c}%
+		{\tablename\ \thetable{} -- 续} \\
+		\toprule
+		速度 & 0 s & 60 s & 120 s & 180 s & 240 s & 300 s \\ 
+		\midrule
+		\endhead
+		
+		\midrule
+		\multicolumn{7}{r}{{续下页}} \\
+		\endfoot
+		
+		\bottomrule
+		\endlastfoot
+		
+		龙头 (m/s) & 1.000000 & 1.000000 & 1.000000 & 1.000000 & 1.000000 & 1.000000 \\
+		第1节龙身 (m/s) & 0.998137 & 1.046008 & 1.001107 & 1.000824 & 1.005636 & 1.042378 \\
+		第51节龙身 (m/s) & 1.014814 & 0.952437 & 0.994762 & 0.993768 & 0.985582 & 0.965798 \\
+		第101节龙身 (m/s) & 0.982906 & 0.950373 & 1.007139 & 1.001360 & 1.024224 & 1.004439 \\
+		第151节龙身 (m/s) & 1.073563 & 1.030220 & 0.995814 & 1.070656 & 1.044647 & 0.981848 \\
+		第201节龙身 (m/s) & 1.023999 & 1.019954 & 0.917484 & 0.957469 & 1.064683 & 0.935564 \\
+		龙尾（后）(m/s) & 1.012068 & 0.974447 & 0.928441 & 1.025021 & 0.976708 & 1.082822 \\
+	\end{longtable}
+\end{center}
+
+\begin{figure}[htbp]
+	\centering
+	\includegraphics[width=0.8\textwidth, keepaspectratio]{../res/3.png}
+	\caption{盘龙队行进轨迹模型求解结果}
+	\label{fig:盘龙队行进轨迹模型求解结果}
+\end{figure}
+
+\clearpage
+
+
+
+
+
+
+
+% =======================================
+% 问题二模型建立与求解
+% =======================================
+
+\mcmSubsection{问题二：盘龙碰撞检测的数学模型}
+% 以与前面问题重述,问题分析不同的语言再次重述问题。
+% 标题格式	问题X：xxx的数学模型
+
+在问题二中,已知盘龙队伍的螺距$b$,初始位置$(16b,0)$,要求从$0$时刻开始至板凳龙之间任一板凳发生碰撞时龙头(前把手)、龙身(前把手)、龙尾(后把手)所处位置及速度。由问题一知板凳龙行进轨迹方程,只需在问题一模型的基础上,延长盘龙的行进时间,添加检测板凳与板凳之间是否碰撞的逻辑,代入问题一建立的模型中求解即可。
+
+\mcmSubsubsection{盘龙碰撞检测数学模型的建立}
+% 简要说明建立模型所需知识的原理
+% 详细的计算过程、推导过程
+% 推导结果的汇总
+
+若盘龙队伍板凳与板凳间发生碰撞,即任意板凳$i$把手中心与任意板凳$j$外沿之间的距离小于所给定的空间。
+
+欧氏距离：
+
+\begin{equation}
+	d_{ij}(t)=\sqrt{(x_j(t)-x_i(t))^2+(y_j(t)-y_i(t))^2}
+\end{equation}
+
+其中$d_{i,i+1}(t)$表示在时刻t的第i和第i+1节板凳之间的前把手(或者后把手)之间的距离。
+当$d_{i,i+1}(t)<=0.3$时认为发生了碰撞,求得时间t,带入问题一模型可以求出各个位置和速度。
+
+
+\begin{figure}[htbp]
+	\centering
+	\includegraphics[width=0.8\textwidth, keepaspectratio]{../res/4.png}
+	\caption{盘龙队行进碰撞示意图1}
+	\label{fig:盘龙队行进碰撞示意图1}
+\end{figure}
+
+\begin{figure}[htbp]
+	\centering
+	\includegraphics[width=0.8\textwidth, keepaspectratio]{../res/5.png}
+	\caption{盘龙队行进碰撞示意图2}
+	\label{fig:盘龙队行进碰撞示意图2}
+\end{figure}
+
+又由常识可知,当盘龙队向前行进时,最先碰撞的部位为龙头处,对其单独抽离出来如子图(b),即龙头把手处与临近几个板凳轴线中心的最短距离小于某值时,龙头处发生碰撞。
+
+考虑理想状态,即当龙头与某节龙身平行相切且相接时,其距离为$15cm + 15cm = 30cm$,但是正常情况下是不可取$30cm$的,此时盘龙无法正常行进,而当龙头板凳最前端恰与某一龙身垂直接触时,此时距离为$27.5cm + 15cm = 42.5cm$,若盘龙继续行进,距离不能小于这个值,则理论上最短距离应大于$42.5cm$
+
+综上所述,只需考虑盘龙队伍龙头与后续的几节龙身碰撞即可,相应的碰撞检测伪代码如下：
+
+\begin{breakablealgorithm}
+	\caption{盘龙队碰撞检测算法}
+	\begin{algorithmic}[1]
+		\Require 时间步长 $t_{\text{step}}$, 螺距 $b$, 初始位置 $(16 \times b, 0)$, 碰撞阈值 $d_{\text{threshold}}$
+		\Ensure 碰撞发生时刻及相关位置和速度
+		
+		\State 初始化：$t \gets 0$, $i \gets 1$
+		\While{未发生碰撞}
+		\State 计算龙头位置 $(x_{\text{head}}(t), y_{\text{head}}(t))$
+		\For{$j = 2$ \textbf{to} $n$}
+		\State 计算第$j$节龙身前把手位置 $(x_j(t), y_j(t))$
+		\State 计算第$j$节龙身后把手位置 $(x_{j+1}(t), y_{j+1}(t))$
+		\State 计算龙身板凳轴线方程 $ax + by + c = 0$
+		\State 计算龙头到龙身板凳轴线的距离:
+		\State $d \gets \frac{|a x_{\text{head}}(t) + b y_{\text{head}}(t) + c|}{\sqrt{a^2 + b^2}}$
+		\If{$d \leq d_{\text{threshold}}$}
+		\State 输出碰撞时刻 $t$,龙头位置 $(x_{\text{head}}(t), y_{\text{head}}(t))$ 和速度 $V_{\text{head}}$
+		\State 输出碰撞龙身节数 $j$,位置 $(x_j(t), y_j(t))$ 和速度 $V_j$
+		\State \textbf{break}
+		\EndIf
+		\EndFor
+		\State $t \gets t + t_{\text{step}}$
+		\State $i \gets i + 1$
+		\EndWhile
+	\end{algorithmic}
+\end{breakablealgorithm}
+
+\mcmSubsubsection{盘龙碰撞检测数学模型求解}
+% 求解思路,计算结果表格、图像,结果分析
+% 更深入一步的探索,控制变量,敏感度分析
+
+1. 假设舞龙队从初始时刻 \( t_0 \) 开始盘入,每秒计算一次位置和距离。
+2. 对于每一秒 \( t \),计算相邻板凳之间的距离 \( d \)。
+3. 如果 \( d < 220 \) cm,则停止迭代,此时\(t_{end} = t - 1 \)（因为碰撞发生在 \( t \) 时刻,但我们需要记录 \( t-1 \) 时刻作为终止时刻）。
+
+\begin{center}
+	\setlength{\tabcolsep}{150pt} % 调整列间距
+	\begin{longtable}{@{}lr@{}}
+		\caption{问题二位置求解结果\label{tab:问题二位置求解结果}}\\
+		\toprule
+		节点 & 422.50 s \\
+		\midrule
+		\endfirsthead
+		
+		\multicolumn{2}{c}%
+		{\tablename\ \thetable{} -- 续上页} \\
+		\toprule
+		节点 & 423.0 s \\
+		\midrule
+		\endhead
+		
+		\midrule
+		\multicolumn{2}{r}{{续下页}} \\
+		\endfoot
+		
+		\bottomrule
+		\endlastfoot
+		
+		龙头x (m) & -1.467884 \\
+		龙头y (m) & 1.153220 \\
+		第1节龙身x (m) & 1.387436 \\
+		第1节龙身y (m) & 0.989670 \\
+		第51节龙身x (m) & -3.102142 \\
+		第51节龙身y (m) & -2.815808 \\
+		第101节龙身x (m) & -1.584905 \\
+		第101节龙身y (m) & 5.436000 \\
+		第151节龙身x (m) & -5.631478 \\
+		第151节龙身y (m) & 3.851347 \\
+		第201节龙身x (m) & 2.286305 \\
+		第201节龙身y (m) & 7.469426 \\
+		龙尾（后）x (m) & 7.319106 \\
+		龙尾（后）y (m) & -3.717012 \\
+	\end{longtable}
+\end{center}
+
+\begin{center}
+	\setlength{\tabcolsep}{150pt} % 调整列间距
+	\begin{longtable}{@{}lr@{}}
+		\caption{问题二速度求解结果\label{tab:问题二速度求解结果}}\\
+		\toprule
+		节点 & 422.50 s \\
+		\midrule
+		\endfirsthead
+		
+		\multicolumn{2}{c}%
+		{\tablename\ \thetable{} -- 续上页} \\
+		\toprule
+		节点 & 422.50 s \\
+		\midrule
+		\endhead
+		
+		\midrule
+		\multicolumn{2}{r}{{续下页}} \\
+		\endfoot
+		
+		\bottomrule
+		\endlastfoot
+		
+		龙头 (m/s) & 1.000000 \\
+		第1节龙身 (m/s) & 1.029322 \\
+		第51节龙身 (m/s) & 1.007556 \\
+		第101节龙身 (m/s) & 0.966386 \\
+		第151节龙身 (m/s) & 1.013554 \\
+		第201节龙身 (m/s) & 1.063351 \\
+		龙尾（后） (m/s) & 0.994257 \\
+	\end{longtable}
+\end{center}
+	
+求解后的示意图如下
+\begin{figure}[htbp]
+	\centering
+	\includegraphics[width=0.8\textwidth, keepaspectratio]{../res/6.png}
+	\caption{盘龙队行进轨迹碰撞模型求解结果}
+	\label{fig:Problem_2}
+\end{figure}
+
+\begin{figure}[htbp]
+	\centering
+	\includegraphics[width=0.8\textwidth, keepaspectratio]{../res/7.png}
+	\caption{调头空间示意图}
+	\label{fig:Problem_3}
+\end{figure}
+
+
+
+
+
+
+
+
+
+
+% =======================================
+% 问题三模型建立与求解
+% =======================================
+
+\mcmSubsection{问题三:盘龙调头最小螺距的数学模型}
+
+问题三聚焦于舞龙队从顺时针盘入到逆时针盘出的转换过程中所需的最小螺距计算。在给定调头空间直径为9米的条件下，本问题要求通过数学建模确定使得龙头前把手能够沿着螺线恰好与调头空间边界相切的最小螺距。这将涉及对螺线路径和圆形调头空间的几何关系进行精确分析和计算。
+
+\mcmSubsubsection{盘龙调头最小螺距模型的建立}
+
+已知板凳龙调头空间是以原点为圆心,半径为$4.5m$的圆形区域,相应示意图如图6所示。
+
+
+
+因此时螺距不定,盘龙过程中不一定与问题一、问题二中队伍一样旋转相同圈数,此时应考虑初始的角度$\theta_{0}$不一定为$32\pi$。又知初始坐标（16$\times$55cm,0）,则$\theta_{0}$应为$2\pi$的正整数倍,有$\theta_0 = k \cdot 2\pi$（k=1,2,3...）按上述逻辑更新龙头前把手中心方程为：
+\begin{equation}
+	r(\theta)=a-\frac{b}{2\pi}(\theta_0-\theta)
+\end{equation}
+
+若给定$\theta_{0}$,则由$r(\theta)=a-\frac{b}{2\pi}(\theta_0-\theta)$所确定的盘龙行进轨迹方程\textbf{顺时针逐步向内旋入},过程中龙头渐渐逼近圆形调头空间,盘龙行进轨迹极径$r$应大于$4.5m$,以保证盘龙不会进入调头空间内部,而是沿着圆形调头空间区域边界相切行进。
+
+调头空间区域直径$D$为9m,则调头空间区域半径$R=4.5m$,调头区域边界轨迹方程为：
+\begin{equation}
+	x^{2}+y^{2} = R^{2}
+\end{equation}
+
+龙头到达调头空间边界时,龙头把手行进轨迹方程$r(\theta)=a-\frac{b}{2\pi}(\theta_0-\theta)$与调头边界区域轨迹方程相切,有：
+\begin{equation}
+	r(\theta_{tangent}) = a-\frac{b}{2\pi}(\theta_0 - \theta_{tangent}) = R
+\end{equation}
+
+所以,
+\begin{equation}
+	\frac{b}{2\pi}(\theta_0-\theta_{tangent}) = a - R
+\end{equation}
+\begin{equation}
+	b = \frac{(a - R)2\pi}{\theta_0-\theta_{tangent}} 
+\end{equation}
+
+$\theta_{tangent}$为到达转向临界区域的极角,此时所对应的角度最小(初始时刻盘龙从$\theta = \theta_0$ 处顺时针旋入,此过程$\theta$递减)。
+
+为避免碰撞,需满足以下条件：对于任意两个板凳i和j,它们之间的距离应大于板凳宽度w：
+\begin{equation}
+	d_{ij} > w, \forall \theta \in [\theta_{tangent}, \theta_0]
+\end{equation}
+其中,
+\begin{equation}
+	d_{ij}=\sqrt{(x_j-x_i)^2+(y_j-y_i)^2}
+\end{equation}
+
+\noindent 优化目标：
+找到最小的螺距$b$和合适的$k$值,使得：
+\begin{equation}
+	b = \min\{b, b_{min}, b_p\}
+\end{equation}
+其中,$b_{min}$为满足相切条件的最小螺距,$b_p$为满足碰撞约束的最小螺距,若只考虑旋入与调头空间相切的话则取$42.5cm$。
+
+\mcmSubsubsection{盘龙调头最小螺距求解}
+
+螺距不定,则盘龙队旋转圈数不定,现给定一定范围的初始角度$\theta_{0}$(理论上讲,$\theta_{0}$不会太大,给定一个可行的范围求出可行解即可),模拟过程中$\theta$从给定的$\theta_{0}$中逐步迭代,每次迭代的过程中寻求与调头区域相切的最小螺距。
+
+python软件求解画图可得:
+
+\begin{figure}[htbp]
+	\centering
+	\includegraphics[width=0.8\textwidth, keepaspectratio]{../res/8.png}
+	\caption{盘龙队行进碰撞示意图1}
+	\label{fig:盘龙队行进碰撞示意图1}
+\end{figure}
+
+\begin{figure}[htbp]
+	\centering
+	\includegraphics[width=0.8\textwidth, keepaspectratio]{../res/9.png}
+	\caption{盘龙队行进碰撞示意图2}
+	\label{fig:盘龙队行进碰撞示意图2}
+\end{figure}
+
+此时优化器结果显示最优螺距 b = 42.50 cm, k = 1。
+
+相切时盘龙队部分位置及速度求解结果如下(完整结果保存在与result2.xlsx相同格式的result3.xlsx中)
+
+\begin{center}
+	\setlength{\tabcolsep}{150pt} % 调整列间距
+	\begin{longtable}{@{}lr@{}}
+		\caption{问题三位置求解结果\label{tab:问题三位置求解结果}}\\
+		\toprule
+		节点 & 423.0 s \\
+		\midrule
+		\endfirsthead
+		
+		\multicolumn{2}{c}%
+		{\tablename\ \thetable{} -- 续上页} \\
+		\toprule
+		节点 & 423.0 s \\
+		\midrule
+		\endhead
+		
+		\midrule
+		\multicolumn{2}{r}{{续下页}} \\
+		\endfoot
+		
+		\bottomrule
+		\endlastfoot
+		
+		龙头x & 3.163949 \\
+		龙头y & -3.195049 \\
+		第1节龙身x & 4.491598 \\
+		第1节龙身y & -0.661884 \\
+		第51节龙身x & -5.142267 \\
+		第51节龙身y & -2.319439 \\
+		第101节龙身x & -0.966355 \\
+		第101节龙身y & -6.487166 \\
+		第151节龙身x & -5.455154 \\
+		第151节龙身y & -4.944170 \\
+		第201节龙身x & -3.452947 \\
+		第201节龙身y & 7.311775 \\
+		龙尾（后）x & 8.298257 \\
+		龙尾（后）y & 1.201039 \\
+	\end{longtable}
+\end{center}
+
+\begin{center}
+	\setlength{\tabcolsep}{150pt} % 调整列间距
+	\begin{longtable}{@{}lr@{}}
+		\caption{问题三速度求解结果\label{tab:问题三速度求解结果}}\\
+		\toprule
+		节点 & 423.0 s \\
+		\midrule
+		\endfirsthead
+		
+		\multicolumn{2}{c}%
+		{\tablename\ \thetable{} -- 续上页} \\
+		\toprule
+		节点 & 422.50 s \\
+		\midrule
+		\endhead
+		
+		\midrule
+		\multicolumn{2}{r}{{续下页}} \\
+		\endfoot
+		
+		\bottomrule
+		\endlastfoot
+		
+		龙头 & 0.937407 \\
+		第1节龙身 & 2.236609 \\
+		第51节龙身 & 1.670910 \\
+		第101节龙身 & 1.712585 \\
+		第151节龙身 & 1.577518 \\
+		第201节龙身 & 1.660737 \\
+		龙尾 & 1.642063 \\
+		龙尾（后） & 1.656984 \\
+	\end{longtable}
+\end{center}
+
+龙头轨迹与调头区域相切。由图7(a)也可以看出,只考虑盘龙盘入情况下龙头与调头空间相切情况下,分析结果与问题二模型中分析的理想情况下碰撞检测的最短距离一致,但若要继续行进,必然要保证碰撞轨迹大于此值。基于几何关系改进的碰撞检测模型放入模型评价与优化中。
+
+
+
+
+
+
+
+
+
+
+
+% =======================================
+% 问题四模型建立与求解
+% =======================================
+
+\mcmSubsection{问题四:盘龙调头最小圆弧模型}
+% 以与前面问题重述,问题分析不同的语言再次重述问题。
+% 标题格式	问题X：xxx的数学模型
+
+问题四要求对舞龙队的调头路径进行优化。已知盘入螺线的螺距为1.7米,盘出螺线与盘入螺线关于螺线中心对称,舞龙队在已设定的调头空间内完成调头。调头路径由两段相切的圆弧组成S形曲线,且前一段圆弧的半径是后一段的2倍,并与盘入、盘出螺线相切。现在的问题是能否通过调整圆弧的半径,保持各部分相切的情况下,缩短调头曲线的长度。龙头前把手的行进速度始终保持在1米/秒。此外,需要从−100秒到100秒的每秒钟,记录舞龙队的位置和速度,并将结果存放在文件result4.xlsx中。同时在论文中详细给出−100秒、−50秒、0秒、50秒和100秒时,龙头前把手、龙头后面的第1、51、101、151、201节龙身前把手,以及龙尾后把手的对应位置和速度。
+
+\mcmSubsubsection{盘龙调头最小圆弧模型的建立}
+% 简要说明建立模型所需知识的原理
+% 详细的计算过程、推导过程
+% 推导结果的汇总
+
+由问题四分析可知盘入螺线的螺距$b=1.7m$,调头空间的半径为$R_0=4.5$m (9m直径的一半)。设转向时第一段圆弧半径为$R_1$,第二段圆弧半径为$R_2=\frac{R_1}{2}$,则相应的,第一个圆弧的圆心与调头空间圆心距离为$R_0-R_1$ ,第二个圆弧的圆心与调头空间圆心距离为$R_0-\frac{R_1}{2}$ 。
+
+第二个圆弧与第一段圆弧相切,两圆心距离有：
+\begin{equation}
+	s_{1,2}=R_{1}+R_{2}=3R_{2}
+\end{equation}
+
+在调头开始时,设$t=0$为调头开始,龙头的行进速度为$v= 1\:m/s$,可在$t=-100S$到$t=100S$,根据调头路径轨迹方程,计算每秒龙头的前把手以及龙身的各节把手的位置与速度。
+
+设进入调头空间的位置为$(x_0,y_0)$
+\begin{equation}
+	\sqrt{x_0^2+y_0^2}=R_{0}
+\end{equation}
+
+假设在调头空间内走过的路径为圆弧的弧长。
+
+前一段圆弧在调头空间内的位置变化：
+\begin{equation}
+	x(t)=x_0+R_1\sin(\frac{t}{R_1})
+\end{equation}
+
+\begin{equation}
+y(t)=y_0-R_1\sin(\frac t{R_1})
+\end{equation}
+
+设第一段圆弧结束时的位置为$(x_1,y_1)$ 后一段圆弧在调头空间内的位置变化：
+
+\begin{equation}
+x(t)=x_{1}+2R_{1}\sin(\frac{t-T}{2R_{1}})\quad t>T
+\end{equation}
+
+\begin{equation}
+y(t)=y_{1}-2R_{1}\sin(\frac{t-T}{2R_{1}})\quad t>T
+\end{equation}
+
+T为走完第一段圆弧所需要的时间。
+\begin{equation}
+T=R_1\cdot\theta_1
+\end{equation}
+
+其中,$\theta_1$等于第一段圆弧对应的角度。
+
+对于后一段出调头空间的位置$(x_2,y_2)$,应有：
+\begin{equation}
+	\sqrt{x_2^2+y_2^2}=R_0
+\end{equation}
+
+\mcmSubsubsection{盘龙调头最小圆弧模型求解}
+
+盘龙调头最小圆弧模型实现的伪代码如下：
+\begin{breakablealgorithm}
+	\caption{盘龙调头最小圆弧模型求解算法}
+	\begin{algorithmic}[1]
+		\Require 初始位置 $(x_0, y_0)$, 圆弧半径 $R_1$, 时间区间 $[-100, 100]$秒, 时间步长 $\Delta t = 1$s
+		\Ensure 记录每秒的龙头前把手和各节龙身位置、速度，结果存储在 \texttt{result4.xlsx}
+		
+		\State 初始化：设圆弧半径 $R_2 \gets \frac{R_1}{2}$
+		\State 设调头空间半径 $R_0 \gets 4.5$ m，龙头速度 $v \gets 1$ m/s
+		\State 设第一段圆弧圆心位置 $(x_{c1}, y_{c1}) \gets (R_0 - R_1, 0)$
+		\State 设第二段圆弧圆心位置 $(x_{c2}, y_{c2}) \gets (R_0 - \frac{R_1}{2}, 0)$
+		\State 初始化时间 $t \gets -100$
+		
+		\While{$t \leq 100$}
+		\If{$t \leq T$} \Comment{第一段圆弧内的位置计算}
+		\State 计算龙头位置： 
+		\[
+		x(t) \gets x_0 + R_1 \cos\left(\frac{t}{R_1}\right), \quad y(t) \gets y_0 + R_1 \sin\left(\frac{t}{R_1}\right)
+		\]
+		\Else \Comment{第二段圆弧内的位置计算}
+		\State 计算龙头位置： 
+		\[
+		x(t) \gets x_1 + R_2 \cos\left(\frac{t - T}{R_2}\right), \quad y(t) \gets y_1 + R_2 \sin\left(\frac{t - T}{R_2}\right)
+		\]
+		\EndIf
+		
+		\State 计算速度：$V(t) \gets 1 \text{ m/s}$，方向为当前位置的切线方向
+		\State 记录龙头和各节龙身前把手、龙尾位置和速度
+		
+		\If{$t = -100$ or $t = -50$ or $t = 0$ or $t = 50$ or $t = 100$}
+		\State 输出详细位置和速度数据至论文
+		\EndIf
+		
+		\State $t \gets t + \Delta t$
+		\EndWhile
+		
+		\State 将所有计算结果存储在 \texttt{result4.xlsx}
+	\end{algorithmic}
+\end{breakablealgorithm}
+
+
+
+
+
+
+
+
+
+
+
+\mcmSubsection{问题五：盘龙最大安全速度模型}
+% 以与前面问题重述,问题分析不同的语言再次重述问题。
+% 标题格式	问题X：xxx的数学模型
+
+问题5要求确定舞龙队沿问题4设定的路径行进时,龙头的最大行进速度。已知龙头的行进速度保持不变,需要确保舞龙队各把手的速度均不超过2米/秒。也就是说,需要计算出在这种路径和速度条件下,龙头的最大行进速度是多少,以保证整个舞龙队的任何部分速度都不会超过2米/秒。
+
+\mcmSubsubsection{盘龙最大安全速度模型的建立}
+首先,我们需要建立舞龙队各部分的动力学模型。假设龙头、龙身和龙尾都是刚体,忽略空气阻力和摩擦力的影响,我们可以使用牛顿第二定律来描述它们的运动。
+
+设龙头质量为 \( m_1 \),龙身每节质量为 \( m_2 \),龙尾质量为 \( m_3 \),龙头受到的推力为 \( F \),则有：
+
+\begin{equation}
+	m_1 \ddot{x}_1 = F - f_1
+\end{equation}
+
+\begin{equation}
+	m_2 \ddot{x}_i = f_{i-1} - f_i \quad (i = 2, 3, ..., n-1)
+\end{equation}
+\begin{equation}
+	m_3 \ddot{x}_n = f_{n-1} - f_n
+\end{equation}
+
+其中\( \ddot{x}_i \) 是第 \( i \) 节龙身的加速度,\( f_i \) 是第 \( i \) 节龙身受到的摩擦力。
+
+由于题目要求舞龙队各把手的速度不超过2 m/s,我们需要在动力学模型中加入速度约束。设龙头前把手的速度为 \( v_1 \),则有：
+
+\begin{equation}
+	v_1 \leq 2 \text{ m/s}
+\end{equation}
+
+对于龙身和龙尾的其他部分,设第 \( i \) 节龙身的速度为 \( v_i \),则有：
+
+\begin{equation}
+	v_i \leq 2 \text{ m/s} \quad (i = 2, 3, ..., n)
+\end{equation}
+
+由于舞龙队沿螺线运动,我们可以使用螺线方程来描述它们的轨迹。设螺线的极坐标方程为：
+
+\begin{equation}
+	 r(\theta) = r_0 + p\frac{\theta}{2\pi}
+\end{equation}
+
+其中,\( r(\theta) \) 是螺线上任意点的半径,\( r_0 \) 是初始半径,\( p \) 是螺距,\( \theta \) 是极角。
+
+
+为了求解龙头的最大行进速度,我们需要结合动力学和运动学模型。设龙头前把手的最大行进速度为 \( v_{max} \),则有：
+
+\begin{equation}
+	v_{max} = \omega r_0
+\end{equation}
+
+其中,\( \omega \) 是龙头前把手的角速度。我们需要找到 \( \omega \) 的最大值,使得舞龙队各把手的速度均不超过2 m/s。
+
+\mcmSubsubsection{盘龙最大安全速度模型求解}
+我们可以使用数值迭代的方法来计算龙头的最大行进速度。从 \( v_{max} = 0 \) 开始,逐渐增加 \( v_{max} \) 的值,并使用动力学和运动学模型来计算舞龙队各部分的位置和速度。当发现任何部分的速度超过2 m/s时,停止迭代,此时的 \( v_{max} \) 即为所求的最大行进速度。
+
+
+最终,我们可以得到龙头的最大行进速度 \( v_{max} \),使得舞龙队各把手的速度均不超过2 m/s。这个速度将确保舞龙队在进行盘旋运动时,不会因为速度过快而导致碰撞或其他安全问题。
+
+算法实现伪代码如下：
+\begin{breakablealgorithm}
+	\caption{舞龙队最大安全速度模型求解算法}
+	\begin{algorithmic}[1]
+		\Require 初始半径 $r_0$, 螺距 $p$, 舞龙队各部分质量 $m_1, m_2, ..., m_n$, 推力 $F$
+		\Ensure 龙头的最大行进速度 $v_{\text{max}}$ 以确保所有部分速度不超过2 m/s
+		
+		\State 初始化：$\omega \gets 0$, $\Delta \omega \gets \text{小的增量值}$
+		\State 设定速度上限 $v_{\text{threshold}} \gets 2$ m/s
+		\State $v_{\text{max}} \gets 0$
+		
+		\While{所有部分速度 $\leq v_{\text{threshold}}$}
+		\State $\omega \gets \omega + \Delta \omega$
+		\State 计算当前角速度下的龙头速度 $v_1 \gets \omega r_0$
+		\State 使用螺线方程计算舞龙队各部分位置和速度
+		\State 检查所有部分速度是否超过 $v_{\text{threshold}}$
+		\If{所有部分速度 $\leq v_{\text{threshold}}$}
+		\State 更新 $v_{\text{max}} \gets v_1$
+		\Else
+		\State \textbf{break}
+		\EndIf
+		\EndWhile
+		
+		\State 输出龙头的最大行进速度 $v_{\text{max}}$
+	\end{algorithmic}
+\end{breakablealgorithm}
+
+
+
+
+
+
+
+
+
+
+
+% =======================================
+% 模型评价与改
+% =======================================
+
+\mcmSection{模型评价与改进}
+
+
+
+\mcmSubsection{模型的评价}
+\mcmSubsubsection{优点}
+1. 理论性：模型基于数学和物理学的基本原理,如阿基米德螺线方程的应用和运动学方程,提供了科学理论的解决方案。
+
+2. 简化性：该模型简化诸多问题,忽略外界因素影响,不考虑人力物力的作用,使得问题处理更加简单容易。
+
+3. 可操作性：模型使用的基本数学和物理方程易于理解和实施,便于进行数值计算。
+
+\mcmSubsubsection{缺点}
+1. 现实性：模型假设龙头、龙身和龙尾都是刚体,然而实际情况会因为龙身的运动导致板凳间的连接压迫,不紧密进而致使弯曲和扭转。
+
+2. 动态因素：模型没有考虑惯性力、离心力等动态因素,这些因素在实际运动中会造成不可忽视的结果结果。
+
+3. 约束条件：模型对速度约束的处理较为简化,没有考虑到速度变化时可能产生的动态响应,应用范围较小。
+
+4.参数依赖性：模型的准确性依赖于准确的参数输入,但是像质量、摩擦力这些因素,在实际情况中可能难以精确测量且时刻波动。
+
+\mcmSubsection{模型改进}
+
+
+
+\mcmSubsubsection{基于螺线公式的碰撞检测模型}
+
+假设龙头前把手螺线距离为$r_0$,龙头后把手螺线距离为$r_1$,第一节板凳的角度为$\theta_0,1$已知龙头板凳的两把手之间的距离为286cm。
+\begin{figure}[htbp]
+	\centering
+	\includegraphics[width=0.8\textwidth, keepaspectratio]{../res/圆弧.png}
+	\caption{圆弧}
+	\label{fig:YuanHu}
+\end{figure}
+
+\begin{equation}
+	\theta_{0,1} = \arccos\left(\frac{286^2 - (r_1^2 + r_0^2)}{2r_0r_1}\right)
+\end{equation}
+
+设以龙头两把手之间的距离与$r_0$和$r_1$围成的面积为$S_{0,1}$，
+
+\begin{equation}
+	S_{0,1} = \frac{1}{2} \sin(\theta_{0,1})
+\end{equation}
+
+因此可以知道龙头板凳到原点的垂直距离$h_0$，
+
+\begin{equation}
+	h_0 = \frac{2S_{0,1}}{286}
+\end{equation}
+
+设龙头前把手的板凳距离原点最远的距离为$\overline{AO}$，
+
+\begin{equation}
+	\overline{AO} = \sqrt{\left(h_0 \sqrt{\left(\frac{r_0}{h_0}\right) - 1} + 27.5\right)^2 + (h_0 + 15)^2}
+\end{equation}
+
+设龙身任意两把手的螺线极径为$r_i, r_{i+1}$，
+
+\begin{equation}
+	\theta_{i,i+1} = \arccos\left(\frac{165^2 - (r_i^2 + r_{i+1}^2)}{2r_ir_{i+1}}\right)
+\end{equation}
+
+设以龙身两把手之间的距离与$r_i$和$r_{i+1}$围成的面积为$S_{i,i+1}$，
+
+\begin{equation}
+	S_{i,i+1} = \frac{1}{2} \sin(\theta_{i,i+1}) r_i r_{i+1}
+\end{equation}
+
+$h_i = \frac{2S_{i,i+1}}{165}$，
+
+设龙身把手的板凳距离原点最近的距离为$\overline{h_i}$，
+
+\begin{equation}
+	\overline{h_i} = h_i - 15
+\end{equation}
+
+设碰撞距离为d，
+
+\begin{equation}
+	d = \overline{h_i} - \overline{AO}
+\end{equation}
+
+可知d是关于$\theta$的一元函数，
+
+\begin{equation}
+	d = f(\theta) = 0
+\end{equation}
+
+认为发生了碰撞。
+
+\mcmSubsubsection{其他改进方向}
+
+1.考虑弹性变形：引入更复杂的模型来考虑龙身在行进过程中发生的的弹性变形,可以使用有限元分析方法来模拟龙身各部分的弯曲和扭转。
+
+2.动态模拟：增加动态因素,使用动力学模拟软件来更精确地模拟龙头和龙身的运动。
+
+3.摩擦力模型：改进摩擦力模型,考虑摩擦力的非线性特性和实际情况下的变化,如静摩擦和动摩擦之间的转换。
+
+4. 速度约束处理：在动力学模型中更精确地处理速度约束,考虑加速度和减速度对速度限制的影响。
+
+5. 参数敏感性分析：进行参数敏感性分析,以评估模型对输入参数的敏感程度,并调整参数以提高模型的鲁棒性。
+
+6. 实验验证：通过与实验数据的对比,验证模型的准确性,并根据实验结果对模型进行调整。
+
+7. 实际应用测试：在实际应用中测试模型的适用性,如在舞龙队的实际表演中,收集数据和反馈,以进一步优化模型。
