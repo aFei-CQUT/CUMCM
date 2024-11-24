@@ -14,23 +14,23 @@
 
 其中世界银行数据库提供的相关操作界面如下:
 
-\begin{center}
-\begin{figure}[h]
-	\centering
-	\begin{minipage}[t]{0.6\textwidth}
-		\centering
-		\dashbox{\includegraphics[width=\textwidth]{../res/世界银行集团.png}} % 使用虚线框住图片
-		\caption{世界银行单个指标查询结果示意图}
-		\label{fig:WorldBank}
-	\end{minipage}%
-	\hspace*{1cm} % 插入水平空间
-	\begin{minipage}[t]{0.34\textwidth}
-		\raggedright % 左对齐
-		\vspace{-5.4cm} % 调整此值以实现更好的对齐文字顶端和图形顶端
-		\qquad 可以看到，页面右下角有导出CSV文件的导出链接，以及 DataBank 元数据库，我们可以通过点击链接下载或查询相关数据。如果获取的数据量过大，则可通过右键点击检查网页源码定位所需元素，通过 Python \\爬虫技术实现自动化爬取。
-	\end{minipage}
-\end{figure}
-\end{center}
+%\begin{center}
+%\begin{figure}[h]
+%	\centering
+%	\begin{minipage}[t]{0.6\textwidth}
+%		\centering
+%		\dashbox{\includegraphics[width=\textwidth]{../res/世界银行集团.png}} % 使用虚线框住图片
+%		\caption{世界银行单个指标查询结果示意图}
+%		\label{fig:WorldBank}
+%	\end{minipage}%
+%	\hspace*{1cm} % 插入水平空间
+%	\begin{minipage}[t]{0.34\textwidth}
+%		\raggedright % 左对齐
+%		\vspace{-5.4cm} % 调整此值以实现更好的对齐文字顶端和图形顶端
+%		\qquad 可以看到，页面右下角有导出CSV文件的导出链接，以及 DataBank 元数据库，我们可以通过点击链接下载或查询相关数据。如果获取的数据量过大，则可通过右键点击检查网页源码定位所需元素，通过 Python \\爬虫技术实现自动化爬取。
+%	\end{minipage}
+%\end{figure}
+%\end{center}
 	
 \mcmSubsubsection{数据预处理}	
 为了对货币供给量、收入、利率与通货膨胀等数据进行描述性分析。我们首先对收集数据进行提取，整合，筛选，补偿，归一化处理。
@@ -39,21 +39,21 @@
 
 其在文件列表中的具体名称如图所示，
 
-\begin{figure}[h]
-	\centering
-	\begin{minipage}[t]{0.6\textwidth}
-		\centering
-		\dashbox{\includegraphics[width=\textwidth]{../res/CSV数据收集列表.png}} % 使用虚线框住图片
-		\caption{各指标下载后文件列表}
-		\label{fig:IndicatorList}
-	\end{minipage}%
-	\hspace*{1cm} % 插入水平空间
-	\begin{minipage}[t]{0.34\textwidth}
-		\raggedright % 左对齐
-		\vspace{-4.7cm} % 调整此值以实现更好的对齐文字顶端和图形顶端
-		\qquad 拓展名以csv结尾的文件是我们的所需文件。而以py结尾的文件是辅助文件，负责列出当前目录下的文件名。所有原始数据文件都放置在代码支撑材料的res文件夹下的csv文件下。
-	\end{minipage}
-\end{figure}
+%\begin{figure}[h]
+%	\centering
+%	\begin{minipage}[t]{0.6\textwidth}
+%		\centering
+%		\dashbox{\includegraphics[width=\textwidth]{../res/CSV数据收集列表.png}} % 使用虚线框住图片
+%		\caption{各指标下载后文件列表}
+%		\label{fig:IndicatorList}
+%	\end{minipage}%
+%	\hspace*{1cm} % 插入水平空间
+%	\begin{minipage}[t]{0.34\textwidth}
+%		\raggedright % 左对齐
+%		\vspace{-4.7cm} % 调整此值以实现更好的对齐文字顶端和图形顶端
+%		\qquad 拓展名以csv结尾的文件是我们的所需文件。而以py结尾的文件是辅助文件，负责列出当前目录下的文件名。所有原始数据文件都放置在代码支撑材料的res文件夹下的csv文件下。
+%	\end{minipage}
+%\end{figure}
 
 \mcmSubsubsection{数据描述性分析}
 
@@ -83,48 +83,48 @@
 
 调用绘图命令绘图如下。
 
-\begin{figure}[H]
-	\centering
-	\begin{minipage}[t]{0.48\linewidth}
-		\subfloat[Bar Plot]{%
-			\includegraphics[width=\linewidth]{../res/1_bar_plot.png}%
-			\label{fig:bar_plot}%
-		}
-		
-		\vspace{0.5em}
-		
-		\subfloat[Box Plot]{%
-			\includegraphics[width=\linewidth]{../res/2_box_plot.png}%
-			\label{fig:box_plot}%
-		}
-		
-		\vspace{0.5em}
-		
-		\subfloat[Area Plot]{%
-			\includegraphics[width=\linewidth]{../res/3_area_plot.png}%
-			\label{fig:area_plot}%
-		}
-	\end{minipage}%
-	\hfill
-	\begin{minipage}[t]{0.48\linewidth}
-		\vspace{1em}
-		\textbf{图 (a) 描述：}\\
-		子图（a）绘出了1994年以后30年的M2，GNI，RIR（实际利率，Real Intrest Rate），IR（以CPI为指数的通货膨胀率， Inflation Rate - CPI）的条形统计图。由图可得，M2和GNI指标逐年递增，而RIR和IR有正有负，与当年的经济状况，国际形势以及意外事故有关。
-		
-		\vspace{4em}
-		
-		\textbf{图 (b) 描述：}\\
-		通过对子图(b)的观察我们可以看到各个指标$\frac{1}{4}$，$\frac{2}{4}$，$\frac{3}{4}$，$\frac{4}{4}$的分位情况，其中，M2及GNI数据分布空间较大，而IR与RIR分布区间较小。需要注意的是，尽管各个指标的量纲不同，但是通过箱线图反映各个指标自身数据四分之比例区间也是具有可比性的。
-		
-		\vspace{4em}
-		
-		\textbf{图 (c) 描述：}\\
-		子图(c)既显示了各个数据随年份的变化趋势也显示了各个指标累计加和的变化情况，各指标的变化趋势实质上与条形图反映一致，不再赘述。而加和情况反映了多年来各个指标的总效益，由图易知，各个指标在时间上纵向求和均为正值，即各个指标在时间维度上加和具有单增趋势。
-	\end{minipage}
-	
-	\caption{不同类型的图及其描述}
-	\label{fig:all_plots}
-\end{figure}
+%\begin{figure}[H]
+%	\centering
+%	\begin{minipage}[t]{0.48\linewidth}
+%		\subfloat[Bar Plot]{%
+%			\includegraphics[width=\linewidth]{../res/1_bar_plot.png}%
+%			\label{fig:bar_plot}%
+%		}
+%		
+%		\vspace{0.5em}
+%		
+%		\subfloat[Box Plot]{%
+%			\includegraphics[width=\linewidth]{../res/2_box_plot.png}%
+%			\label{fig:box_plot}%
+%		}
+%		
+%		\vspace{0.5em}
+%		
+%		\subfloat[Area Plot]{%
+%			\includegraphics[width=\linewidth]{../res/3_area_plot.png}%
+%			\label{fig:area_plot}%
+%		}
+%	\end{minipage}%
+%	\hfill
+%	\begin{minipage}[t]{0.48\linewidth}
+%		\vspace{1em}
+%		\textbf{图 (a) 描述：}\\
+%		子图（a）绘出了1994年以后30年的M2，GNI，RIR（实际利率，Real Intrest Rate），IR（以CPI为指数的通货膨胀率， Inflation Rate - CPI）的条形统计图。由图可得，M2和GNI指标逐年递增，而RIR和IR有正有负，与当年的经济状况，国际形势以及意外事故有关。
+%		
+%		\vspace{4em}
+%		
+%		\textbf{图 (b) 描述：}\\
+%		通过对子图(b)的观察我们可以看到各个指标$\frac{1}{4}$，$\frac{2}{4}$，$\frac{3}{4}$，$\frac{4}{4}$的分位情况，其中，M2及GNI数据分布空间较大，而IR与RIR分布区间较小。需要注意的是，尽管各个指标的量纲不同，但是通过箱线图反映各个指标自身数据四分之比例区间也是具有可比性的。
+%		
+%		\vspace{4em}
+%		
+%		\textbf{图 (c) 描述：}\\
+%		子图(c)既显示了各个数据随年份的变化趋势也显示了各个指标累计加和的变化情况，各指标的变化趋势实质上与条形图反映一致，不再赘述。而加和情况反映了多年来各个指标的总效益，由图易知，各个指标在时间上纵向求和均为正值，即各个指标在时间维度上加和具有单增趋势。
+%	\end{minipage}
+%	
+%	\caption{不同类型的图及其描述}
+%	\label{fig:all_plots}
+%\end{figure}
 
 % =======================================
 % 问题二
@@ -193,23 +193,23 @@ $\pi_t^e$ 是通货膨胀预期率
 $\gamma_0, \gamma_1, \gamma_2, \gamma_3, \gamma_4, \gamma_5$ 是待估计的系数
 $\epsilon_t$ 是随机误差项。
 
-\begin{figure}[h]
-	\centering
-	\begin{minipage}[t]{0.6\textwidth}
-		\centering
-		\dashbox{\includegraphics[width=\textwidth]{../res/flowchart.png}} % 使用虚线框住图片
-		\caption{集成学习示意图}
-		\label{fig:flowchart}
-	\end{minipage}%
-	\hspace*{0.5cm} % 插入水平空间
-	\begin{minipage}[t]{0.35\textwidth}
-		\raggedright % 左对齐
-		\vspace{-7cm} % 调整此值以实现更好的对齐
-		左侧是多元线性回归综合模型中使用集成学习方法训练模型示意图。该机器学习以线性回归模型，决策树模型，随机森林模型，梯度提升模型以及支持向量机模型作为基学习器。流程图反映了使用输入数据进行训练模型，然后调用模型对新样本进行预测打分投票，经软投票输出最终预测结果的基本流程。
-		\par % 确保段落结束
-		% 如果需要添加更多文本，可以继续添加
-	\end{minipage}
-\end{figure}
+%\begin{figure}[h]
+%	\centering
+%	\begin{minipage}[t]{0.6\textwidth}
+%		\centering
+%		\dashbox{\includegraphics[width=\textwidth]{../res/flowchart.png}} % 使用虚线框住图片
+%		\caption{集成学习示意图}
+%		\label{fig:flowchart}
+%	\end{minipage}%
+%	\hspace*{0.5cm} % 插入水平空间
+%	\begin{minipage}[t]{0.35\textwidth}
+%		\raggedright % 左对齐
+%		\vspace{-7cm} % 调整此值以实现更好的对齐
+%		左侧是多元线性回归综合模型中使用集成学习方法训练模型示意图。该机器学习以线性回归模型，决策树模型，随机森林模型，梯度提升模型以及支持向量机模型作为基学习器。流程图反映了使用输入数据进行训练模型，然后调用模型对新样本进行预测打分投票，经软投票输出最终预测结果的基本流程。
+%		\par % 确保段落结束
+%		% 如果需要添加更多文本，可以继续添加
+%	\end{minipage}
+%\end{figure}
 
 % =======================================
 % 问题三
